@@ -12,27 +12,227 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 import sys
-
+import re,rstr
+import smtplib
+import db
 class Ui_loginSection(QWidget):
     
     def exit(self):
         self.loginSec.close()
 
     def switchQuizAdminLogin(self):
+        self.loginCred1.clear()
+        self.loginCred2.clear()
+        self.signUpCred0.clear()
+        self.signUpCred1.clear()
+        self.signUpCred2.clear()
+        self.signUpCred3.clear()
+        self.signUpCred4.clear()
+        self.takerNameEdit.clear()
+        self.quizCodeEdit.clear()
         self.quizAdminLoginSection.setVisible(True)
         self.quizAdminRegisterSection.setVisible(False)
         self.quizTakerEntrySection.setVisible(False)
 
     def switchQuizAdminRegister(self):
+        self.loginCred1.clear()
+        self.loginCred2.clear()
+        self.signUpCred0.clear()
+        self.signUpCred1.clear()
+        self.signUpCred2.clear()
+        self.signUpCred3.clear()
+        self.signUpCred4.clear()
+        self.takerNameEdit.clear()
+        self.quizCodeEdit.clear()
         self.quizAdminLoginSection.setVisible(False)
         self.quizAdminRegisterSection.setVisible(True)
         self.quizTakerEntrySection.setVisible(False)
         
     def switchQuizTakerEntry(self):
+        self.loginCred1.clear()
+        self.loginCred2.clear()
+        self.signUpCred0.clear()
+        self.signUpCred1.clear()
+        self.signUpCred2.clear()
+        self.signUpCred3.clear()
+        self.signUpCred4.clear()
+        self.takerNameEdit.clear()
+        self.quizCodeEdit.clear()
         self.quizAdminLoginSection.setVisible(False)
         self.quizAdminRegisterSection.setVisible(False)
         self.quizTakerEntrySection.setVisible(True)
-        
+    def validateUsername(self,username):
+        err = ""
+        if(username==""):
+            err = "Username Should not be blank.\n"
+        if(len(username)<3):
+            err+="Username Should be of minimum of length 3.\n"
+        if(" " in username):
+            err+="Username should not contain spaces.\n"
+        x = re.search("[a-zA-Z]",username)
+        if(x==None):
+            err+="Username must contain atleast one alphabet.\n"
+        if(err!=""):
+            return [False,err]
+        else:
+            return [True,err]
+    def getSignUpCreds(self):
+        name = self.signUpCred0.text().strip()
+        username = self.signUpCred1.text().strip()
+        email = self.signUpCred2.text().strip()
+        password = self.signUpCred3.text()
+        cnfPassword = self.signUpCred4.text()
+        err = ""
+        if(name==""):
+            self.signUpCred0.clear()
+            err+="Name field must not blank.\n"
+        usrVal = self.validateUsername(username)
+        if(not usrVal[0]):
+            self.signUpCred1.clear()
+            err+=usrVal[1]
+        passVal = self.validatePassword(password)
+        if(not usrVal[0]):
+            self.signUpCred3.clear()
+            err+=passVal[1]
+        if(email=="" or " " in email):
+            self.signUpCred2.clear()
+            err+="Invalid Format for Email.\n"
+        if(err!=""):
+            QMessageBox.critical(self,"Invalid Input Format Error",err)
+            return
+        if(cnfPassword!=password):
+            QMessageBox.critical(self,"Password Mismatch","Entered Password does not match with above password.")
+            self.signUpCred4.clear()
+            return
+        if(db.verifyUsername(username)[0]):
+            QMessageBox.critical(self,"Error","Username already exists.")
+            self.loginCred1.clear()
+            self.loginCred2.clear()
+            return
+        res = self.validateEmail(email,name)
+        if(res==True):
+            if(db.addQuizAdmin([name,username,password,email])):
+                QMessageBox.information(self,"Success",f"{name}, you are all set to create and manage Quizes. Login as Quiz Admin to get started.")
+                self.switchQuizTakerEntry()
+                return
+            else:
+                QMessageBox.critical(self,"Failure","Something went wrong. Failed to register.")
+                self.signUpCred0.clear()
+                self.signUpCred1.clear()
+                self.signUpCred2.clear()
+                self.signUpCred3.clear()
+                self.signUpCred4.clear()
+                return     
+        elif(res==None):
+            return
+        else:
+            QMessageBox.critical(self,"Verifcation Failure","Email Verification Failed. Try Again Later.")
+            self.signUpCred0.clear()
+            self.signUpCred1.clear()
+            self.signUpCred2.clear()
+            self.signUpCred3.clear()
+            self.signUpCred4.clear()
+            return
+    def sendEmail(self,to_email,OTP,name):
+        try: 
+            smtp = smtplib.SMTP('smtp.gmail.com', 587) 
+            smtp.starttls() 
+            smtp.login("nildark2020@gmail.com","npewknmqghmnkett")
+            message = f"Hello {name},\n    Your OTP for email verification is "+OTP+"\nFrom Team DarkDevs" 
+            message = 'Subject: {}\n\n{}'.format("Verification Code", message)
+            smtp.sendmail("nildark2020@gmail.com", to_email,message) 
+            smtp.quit() 
+            print ("Email sent successfully!") 
+            return True
+        except Exception as ex: 
+            print(ex)
+            return False
+    def validateEmail(self,email,name):
+        print(email)
+        sent_vercode = rstr.xeger(r'[0-9]{6}')
+        print(sent_vercode)
+        if(self.sendEmail(email,sent_vercode,name)):
+            recv_vercode, done = QInputDialog.getText(self, 'Email Verification', f'Enter Verification Code sent to your email: {email}')
+            if(done):
+                if(recv_vercode==sent_vercode):
+                    QMessageBox.information(self,"Verification Success","Email Verified Successfully.")
+                    return True
+                else:
+                    QMessageBox.critical(self,"Verification Failure","Verification code mismatch. Try again.")
+                    return None
+            else:
+                return False
+        else:
+            return False
+    def validatePassword(self,password):
+        err = ""
+        if(password==""):
+            err = "Password Should not be blank.\n"
+        if(len(password)<8):
+            err+="Password Should be of minimum length 8.\n"
+        if(" " in password):
+            err+="Password should not contain spaces.\n"
+        x = re.search("^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",password)
+        if(x==None):
+            err+="Password should contain atleast one alphabet and one digit.\n"
+        if(err!=""):
+            return [False,err]
+        else:
+            return [True,err]
+    def getLoginCreds(self):
+        username = self.loginCred1.text().strip()
+        password = self.loginCred2.text().strip()
+        err = False
+        err1,err2="",""
+        if(username==""):
+            err = True
+            self.loginCred1.clear()
+            err1 = "Username should not be blank."
+        if(password==""):
+            err = True
+            self.loginCred2.clear()
+            err2 = "Password should not be blank."
+        if(err):        
+            QMessageBox.critical(self,"Invalid Input Error",(err1+"\n"+err2).strip())
+            return
+        res = self.adminLogin(username,password)
+        if(res):
+            print("logged in")
+        else:
+            print("failed")
+    def adminLogin(self,username,password):
+        res = db.verifyUsername(username)
+        if(res[0]):
+            if(res[1]==password):
+                return True
+            else:
+                QMessageBox.critical(self,"Error","Incorrect Password.")
+                self.loginCred2.clear()    
+                return False
+        else:
+            QMessageBox.critical(self,"Error","Username not found")
+            self.loginCred1.clear()
+            self.loginCred2.clear()
+            return False
+    def getTakerCreds(self):
+        name = self.takerNameEdit.text().strip()
+        quizcode = self.quizCodeEdit.text().strip()
+        err = ""
+        if(name==""):
+            self.takerNameEdit.clear()
+            err+="Name field must not blank.\n"
+        if(quizcode==""):
+            self.quizCodeEdit.clear()
+            err+="Quiz Code field must not blank.\n"
+        else:
+            x = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d/[A-Z,0-9]{6}",quizcode)
+            if(x==None):
+                self.quizCodeEdit.clear()
+                err+="Quiz Code is invalid"
+        if(err!=""):
+            QMessageBox.critical(self,"Error",err)
+            return
+        print(name,quizcode)   
     def setupUi(self, loginSection):
         if not loginSection.objectName():
             loginSection.setObjectName(u"loginSection")
@@ -123,7 +323,7 @@ class Ui_loginSection(QWidget):
         icon2 = QIcon()
         icon2.addFile(u"Images/login_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         self.loginButton.setIcon(icon2)
-        # self.loginButton.clicked.connect(self.switchQuizAdminLogin)
+        self.loginButton.clicked.connect(self.getLoginCreds)
 
         self.horizontalLayout_3.addWidget(self.loginButton)
 
@@ -249,6 +449,7 @@ class Ui_loginSection(QWidget):
         icon3 = QIcon()
         icon3.addFile(u"Images/register.png", QSize(), QIcon.Normal, QIcon.Off)
         self.registerButton.setIcon(icon3)
+        self.registerButton.clicked.connect(self.getSignUpCreds)
 
         self.horizontalLayout_10.addWidget(self.registerButton)
 
@@ -350,6 +551,7 @@ class Ui_loginSection(QWidget):
         icon5 = QIcon()
         icon5.addFile(u"Images/right_arrow.png", QSize(), QIcon.Normal, QIcon.Off)
         self.switchQuizButton.setIcon(icon5)
+        self.switchQuizButton.clicked.connect(self.getTakerCreds)
 
         self.horizontalLayout_14.addWidget(self.switchQuizButton)
 
@@ -384,9 +586,9 @@ class Ui_loginSection(QWidget):
         loginSection.setWindowTitle(QCoreApplication.translate("loginSection", u"Dialog", None))
         self.quizAdminLoginSection.setTitle(QCoreApplication.translate("loginSection", u"Quiz Admin Login", None))
 #if QT_CONFIG(tooltip)
-        self.loginCred1.setToolTip(QCoreApplication.translate("loginSection", u"Enter Valid Email/Username", None))
+        self.loginCred1.setToolTip(QCoreApplication.translate("loginSection", u"Enter Valid Username", None))
 #endif // QT_CONFIG(tooltip)
-        self.loginCred1.setPlaceholderText(QCoreApplication.translate("loginSection", u"Enter Email/Username", None))
+        self.loginCred1.setPlaceholderText(QCoreApplication.translate("loginSection", u"Enter Username", None))
 #if QT_CONFIG(tooltip)
         self.loginCred2.setToolTip(QCoreApplication.translate("loginSection", u"Enter Password", None))
 #endif // QT_CONFIG(tooltip)
@@ -409,7 +611,7 @@ class Ui_loginSection(QWidget):
 #endif // QT_CONFIG(tooltip)
         self.signUpCred0.setPlaceholderText(QCoreApplication.translate("loginSection", u"Name", None))
 #if QT_CONFIG(tooltip)
-        self.signUpCred1.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Username should satisfy:</p><p>1. Min Length 3</p><p>2. Contain atleast one alphabet and one digit</p><p>3. Contain no spaces</p></body></html>", None))
+        self.signUpCred1.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Username should satisfy:</p><p>1. Min Length 3</p><p>2. Contain atleast one alphabet</p><p>3. Contain no spaces</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.signUpCred1.setPlaceholderText(QCoreApplication.translate("loginSection", u"Username", None))
 #if QT_CONFIG(tooltip)
