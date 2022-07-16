@@ -130,6 +130,19 @@ def addParticipant(session_code,participantName,completionStatus=False,score=Non
     except Exception as err:
         print(err)
         return None
+def updateParticipant(session_code,pcode,completionStatus=False,score=None):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        col = db["sessions"]
+        query = {"session_code":session_code}
+        
+        new = {"$set":{"participants":{pcode:{"participantName":participantName,"completionStatus":completionStatus,"score":score}}}}
+        col.update_one(query,new)   
+        return pcode
+    except Exception as err:
+        print(err)
+        return None
 if __name__=="__main__":
     client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
     db = client.get_database('quiz')
