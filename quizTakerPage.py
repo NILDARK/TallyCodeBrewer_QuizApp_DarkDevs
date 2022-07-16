@@ -79,9 +79,20 @@ class Ui_QuizPlatform(QMainWindow):
             self.curQues=self.totalQues-1
         self.showQuestion()
     def submitQuiz(self):
+        self.evaluateQuiz()
         
         pass
-    
+    def evaluateQuiz(self):
+        totalScore = 0
+        self.score = 0
+        for i in range(self.totalQues):
+            question = self.questions[self.queDisplayArr[self.curQues]]
+            totalScore+=int(question["score"])
+        for q,resp in self.response.items():
+            question = self.questions[q]
+            cor = question["answer"][0]
+            if(resp==cor):
+                self.score+=int(question["score"])
     def resetSelection(self):
         resp = self.optionsGroup.checkedId()
         self.response[self.queDisplayArr[self.curQues]]=-1
