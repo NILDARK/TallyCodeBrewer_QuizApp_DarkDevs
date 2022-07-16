@@ -284,6 +284,8 @@ class Ui_MainWindow(QMainWindow):
         duration = self.duration.text().strip()
         if(duration!="" and duration.isnumeric()==False):
             err+="Duration must be a number.\n"
+        else:
+            duration = 10
         if(self.isTimeConstrained.isChecked()):
             if(self.sessionStart.dateTime().addSecs(int(duration)*60)>self.sessionEnd.dateTime()):
                 err+="Time constraint invalid.\n"
@@ -439,6 +441,9 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionStart = QDateTimeEdit(self.widget_6)
         self.sessionStart.setObjectName(u"sessionStart")
+        self.sessionStart.setCalendarPopup(True)
+        self.sessionStart.setCalendarWidget(QCalendarWidget())
+        self.sessionStart.setDisplayFormat("dd-MM-yyyy hh:mm:ss")
         self.sessionStart.setMinimumDateTime(QDateTime.currentDateTime())
         self.sessionStart.dateTimeChanged.connect(self.sessionStartChanged)
         self.horizontalLayout_3.addWidget(self.sessionStart)
@@ -450,6 +455,9 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionEnd = QDateTimeEdit(self.widget_6)
         self.sessionEnd.setObjectName(u"sessionEnd")
+        self.sessionEnd.setCalendarPopup(True)
+        self.sessionEnd.setCalendarWidget(QCalendarWidget())
+        self.sessionEnd.setDisplayFormat("dd-MM-yyyy hh:mm:ss")
         self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
         self.horizontalLayout_3.addWidget(self.sessionEnd)
 

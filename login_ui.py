@@ -14,12 +14,19 @@ from PySide2.QtWidgets import *
 import sys
 import re,rstr
 import smtplib
-# import db
-from quizAdminPage import Ui_MainWindow,db
+import datetime
+import db
+from quizAdminPage import Ui_MainWindow
+from quizTakerPage import Ui_QuizPlatform
 class MainSpace(QMainWindow):
     def __init__(self, username):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow(username)
+        self.ui.setupUi(self)
+class MainSpace2(QMainWindow):
+    def __init__(self, name,session,pcode):
+        QMainWindow.__init__(self)
+        self.ui = Ui_QuizPlatform(name,session,pcode)
         self.ui.setupUi(self)
 class Ui_loginSection(QWidget):
     
@@ -239,14 +246,48 @@ class Ui_loginSection(QWidget):
             self.quizCodeEdit.clear()
             err+="Quiz Code field must not blank.\n"
         else:
-            x = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d/[A-Z,0-9]{6}",quizcode)
-            if(x==None):
+            x = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d",quizcode)
+            y = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d/[A-Z,0-9]{6}",quizcode)
+            if(x==None and y==None):
                 self.quizCodeEdit.clear()
-                err+="Quiz Code is invalid"
+                err+="Session Code is invalid"
         if(err!=""):
             QMessageBox.critical(self,"Error",err)
             return
-        print(name,quizcode)   
+        res = db.verifySessionCode(quizcode)
+        if(res[0]==None):
+            QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
+            return
+        elif(res[0]==False):
+            QMessageBox.critical(self,"Database Error","Session Code is invalid.")
+            return
+        else:
+            session = res[1]
+            start = session["session_start"]
+            end = session["session_end"]
+            if(start!=None):
+                curtime = datetime.datetime.now()
+                print(curtime,end,curtime>end)
+                if(curtime<start):
+                    QMessageBox.information(self,"Info","Quiz session is not started yet. You may attempt from "+str(start)+" to "+str(end-datetime.timedelta(minutes = int(session["duration"]))))
+                    return
+                elif(curtime>end):
+                    QMessageBox.information(self,"Info","Quiz session expired.")
+                    return
+                elif((curtime)>(end-datetime.timedelta(minutes = int(session["duration"])))):
+                    QMessageBox.information(self,"Info","You can not attempt the quiz as you cannot complete the quiz by the session end.")
+                    return
+            res = db.addParticipant(session["session_code"],name,False,None)
+            if(res==None):
+                QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
+                return
+            
+            self.main = MainSpace2(name,session,res)
+            self.exit()
+            self.main.show()
+            print(session)    
+                    
+                    
     def setupUi(self, loginSection):
         if not loginSection.objectName():
             loginSection.setObjectName(u"loginSection")
@@ -519,7 +560,7 @@ class Ui_loginSection(QWidget):
         self.quizCodeEdit = QLineEdit(self.widget_15)
         self.quizCodeEdit.setObjectName(u"quizCodeEdit")
         self.quizCodeEdit.setClearButtonEnabled(False)
-
+        self.quizCodeEdit.returnPressed.connect(self.getTakerCreds)
         self.horizontalLayout_13.addWidget(self.quizCodeEdit)
 
 
