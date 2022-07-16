@@ -15,6 +15,12 @@ import sys
 import re,rstr
 import smtplib
 import db
+from quizAdminPage import Ui_MainWindow
+class MainSpace(QMainWindow):
+    def __init__(self, username):
+        QMainWindow.__init__(self)
+        self.ui = Ui_MainWindow(username)
+        self.ui.setupUi(self)
 class Ui_loginSection(QWidget):
     
     def exit(self):
@@ -197,9 +203,10 @@ class Ui_loginSection(QWidget):
             return
         res = self.adminLogin(username,password)
         if(res):
-            print("logged in")
-        else:
-            print("failed")
+            self.main = MainSpace(username)
+            self.exit()
+            self.main.show()
+        return
     def adminLogin(self,username,password):
         res = db.verifyUsername(username)
         if(res[0]):
@@ -270,7 +277,6 @@ class Ui_loginSection(QWidget):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.loginCred1 = QLineEdit(self.widget_3)
         self.loginCred1.setObjectName(u"loginCred1")
-
         self.horizontalLayout.addWidget(self.loginCred1)
 
 
@@ -283,6 +289,7 @@ class Ui_loginSection(QWidget):
         self.loginCred2 = QLineEdit(self.widget_4)
         self.loginCred2.setObjectName(u"loginCred2")
         self.loginCred2.setEchoMode(QLineEdit.Password)
+        self.loginCred2.returnPressed.connect(self.getLoginCreds)
 
         self.horizontalLayout_2.addWidget(self.loginCred2)
 
