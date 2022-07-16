@@ -57,7 +57,7 @@ def checkSessionCode(a):
     except Exception as err:
         print(err)
         return True
-def publishQuiz(questions,nickname,duration,start,end,username):
+def publishQuiz(questions,nickname,duration,username,start=None,end=None):
     try:
         client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')

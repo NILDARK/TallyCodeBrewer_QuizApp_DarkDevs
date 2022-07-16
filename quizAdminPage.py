@@ -294,6 +294,9 @@ class Ui_MainWindow(QMainWindow):
             start = parser.parse(start)
             end = parser.parse(end)
             print(start,end)
+        else:
+            start=None
+            end = None
         if(len(self.questions)==0):
             err+="You have not added questions or may not have valid inputs. Try Adding or editing added questions.\n"
         if(err!=""):
@@ -312,7 +315,8 @@ class Ui_MainWindow(QMainWindow):
             res = alert.exec_()
             if(res==4194304):
                 return
-        res = db.publishQuiz(self.questions,quizNickName,duration,start,end,self.username)
+        
+        res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
         if(res[0]):
             print("Published Successfully",res[1])
             self.resetAll()
