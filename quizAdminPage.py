@@ -13,7 +13,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from functools import partial
 from dateutil import parser
-# import sip
+import db
 
 class Ui_MainWindow(QMainWindow):
     def __init__(self,username):
@@ -179,6 +179,8 @@ class Ui_MainWindow(QMainWindow):
             answer.append(2)
         if(opt4.isChecked()):
             answer.append(3)
+        if(score==""):
+            score = "1"
         self.questions[id] = {"question":que,"options":options,"score":int(score),"answer":answer}
         print(self.questions)
         doneObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton#{id}")
@@ -272,7 +274,14 @@ class Ui_MainWindow(QMainWindow):
             start = parser.parse(start)
             end = parser.parse(end)
             print(start,end)
-
+        if(err!=""):
+            QMessageBox.critical(self,"Error",err)
+            return
+        res = db.publishQuiz(self.questions,quizNickName,duration,start,end,self.username)
+        if(res[0]):
+            print("Published Successfully",res[1])
+        else:
+            print("failed")
     def logOut(self):
         self.mwin.close()
         

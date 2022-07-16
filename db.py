@@ -1,6 +1,8 @@
 import pymongo
 import datetime
-import bson
+# import bson
+import rstr
+import re
 def addQuizAdmin(details):
     try:
         client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
@@ -40,8 +42,60 @@ def checkEmailAvaibility(email):
     except Exception as err:
         print(err)
         return None
-def addQuestions(questions):
-    pass
+def checkSessionCode(a):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        col = db["sessions"]
+        query = {"session_code":a}
+        res = col.find(query)   
+        for x in res:
+            return False
+        else:
+            return True
+    except Exception as err:
+        print(err)
+        return True
+def publishQuiz(questions,nickname,duration,start,end,username):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        col = db["sessions"]
+        a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
+        while(checkSessionCode(a)):
+            a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
+        session_code = a
+        session_nickname = nickname
+        duration = int(duration)
+        status = False
+        invites = {}
+        session_owner = username
+        ques = {}
+        for x in questions.values():
+            qid = bson.ObjectId()
+            d = {}
+            d["question"]=x["question"]
+            d["score"]=x["score"]
+            options = {}
+            ansindx = x["answer"][0]
+            for k,val in x["options"].items():
+                optid = bson.ObjectId()
+                options[optid]=val
+                if(k==ansindx):
+                    try:
+                        d["answer"].append(optid)
+                    except:
+                        d["answer"]=[optid]
+            d["options"]=options
+            d["isMul"]=False
+            ques[qid]=d
+        record = {"session_code":session_code,"session_owner":session_owner,"session_nickname":session_nickname,"session_start":start,"session_end":end,"duration":duration,"questions":ques,"status":status}
+        col.insert_one(record)
+        return [True,session_code]
+    except Exception as err:
+        print(err)
+        return [False,None]
+    
 if __name__=="__main__":
     client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
     db = client.get_database('quiz')

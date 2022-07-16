@@ -14,8 +14,8 @@ from PySide2.QtWidgets import *
 import sys
 import re,rstr
 import smtplib
-import db
-from quizAdminPage import Ui_MainWindow
+# import db
+from quizAdminPage import Ui_MainWindow,db
 class MainSpace(QMainWindow):
     def __init__(self, username):
         QMainWindow.__init__(self)
@@ -158,7 +158,7 @@ class Ui_loginSection(QWidget):
         if(email_aval==None):
             QMessageBox.critical(self,"Connection Error","Something went wrong. Please check internet connection and try later.")
             return None
-        elif(email_val==False):
+        elif(email_aval==False):
             QMessageBox.critical(self,"Database Error","Email Already in use. Try Using another email or login with username associated with it.")
             self.signUpCred2.clear()
             return None
