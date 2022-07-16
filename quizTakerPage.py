@@ -14,6 +14,7 @@ from PySide2.QtWidgets import *
 import enum
 import random
 import db
+from functools import partial
 class TimerStatus(enum.Enum):
     init, counting, paused = 1, 2, 3
 class Ui_QuizPlatform(QMainWindow):
@@ -32,6 +33,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.totalQues = len(self.questions)
         self.curOptionBasket = {}
         self.instructionsButClicked = False
+        self.forceFullSubmit = False
     def showQuestion(self):
         question = self.questions[self.queDisplayArr[self.curQues]]
         self.questionEdit.setPlainText(question["question"])
@@ -79,7 +81,9 @@ class Ui_QuizPlatform(QMainWindow):
         if(self.curQues-1<0):
             self.curQues=self.totalQues-1
         self.showQuestion()
-    def submitQuiz(self):
+    def submitQuiz(self,fsub=False):
+        if(fsub):
+            self.forceFullSubmit = True
         self._left_seconds = 0
         self.score = self.evaluateQuiz()
         self.completionStatus = True
@@ -97,7 +101,7 @@ class Ui_QuizPlatform(QMainWindow):
         totalScore = 0
         score = 0
         for i in range(self.totalQues):
-            question = self.questions[self.queDisplayArr[self.curQues]]
+            question = self.questions[self.queDisplayArr[i]]
             totalScore+=int(question["score"])
         for q,resp in self.response.items():
             question = self.questions[q]
@@ -118,8 +122,9 @@ class Ui_QuizPlatform(QMainWindow):
             self.showTime()
             self._status = TimerStatus.init
             self._left_seconds = self.session["duration"] * 60
-            QMessageBox.information(self,"Info","Out of Time. Submitting your responses.")
-            self.submitQuiz()
+            if(self.forceFullSubmit==False):
+                QMessageBox.information(self,"Info","Out of Time. Submitting your responses.")
+                self.submitQuiz()
             
     def _start_event(self):
         if (self._status == TimerStatus.init or self._status == TimerStatus.paused) and self._left_seconds > 0:
@@ -237,7 +242,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.submitQuizButton = QPushButton(self.widget_5)
         self.submitQuizButton.setObjectName(u"submitQuizButton")
         self.submitQuizButton.setVisible(False)
-        self.submitQuizButton.clicked.connect(self.submitQuiz)
+        self.submitQuizButton.clicked.connect(partial(self.submitQuiz,True))
         self.horizontalLayout.addWidget(self.submitQuizButton)
 
         self.instructionsIcon = QPushButton(self.widget_5)
