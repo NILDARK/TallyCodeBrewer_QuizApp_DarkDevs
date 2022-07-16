@@ -12,6 +12,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from functools import partial
+from dateutil import parser
 # import sip
 
 class Ui_MainWindow(QMainWindow):
@@ -19,7 +20,7 @@ class Ui_MainWindow(QMainWindow):
         QMainWindow.__init__(self)
         self.username = username
         self.qid = 0
-        self.questions = [] 
+        self.questions = {}
         
         
     def addQuestion(self):
@@ -61,14 +62,15 @@ class Ui_MainWindow(QMainWindow):
         widget_5.setObjectName(f"widget_5#{self.qid}")
         horizontalLayout_3 = QHBoxLayout(widget_5)
         horizontalLayout_3.setObjectName(f"horizontalLayout_3#{self.qid}")
-        opt1 = QRadioButton(widget_5)
-        opt1.setObjectName(f"opt1#{self.qid}")
-        horizontalLayout_3.addWidget(opt1)
+        opt_1 = QRadioButton(widget_5)
+        opt_1.setObjectName(f"opt_1#{self.qid}")
+        horizontalLayout_3.addWidget(opt_1)
         horizontalSpacer_2 = QSpacerItem(191, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_3.addItem(horizontalSpacer_2)
-        toolButton = QToolButton(widget_5)
-        toolButton.setObjectName(f"toolButton#{self.qid}")
-        horizontalLayout_3.addWidget(toolButton)
+        toolButton_1 = QToolButton(widget_5)
+        toolButton_1.setObjectName(f"toolButton_1#{self.qid}")
+        toolButton_1.clicked.connect(partial(self.editOption,toolButton_1.objectName()))
+        horizontalLayout_3.addWidget(toolButton_1)
         verticalLayout.addWidget(widget_5)
         widget_6 = QWidget(widget_4)
         widget_6.setObjectName(f"widget_6#{self.qid}")
@@ -81,6 +83,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_4.addItem(horizontalSpacer_3)
         toolButton_2 = QToolButton(widget_6)
         toolButton_2.setObjectName(f"toolButton_2#{self.qid}")
+        toolButton_2.clicked.connect(partial(self.editOption,toolButton_2.objectName()))
         horizontalLayout_4.addWidget(toolButton_2)
         verticalLayout.addWidget(widget_6)
         widget_7 = QWidget(widget_4)
@@ -94,6 +97,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_5.addItem(horizontalSpacer_4)
         toolButton_3 = QToolButton(widget_7)
         toolButton_3.setObjectName(f"toolButton_3#{self.qid}")
+        toolButton_3.clicked.connect(partial(self.editOption,toolButton_3.objectName()))
         horizontalLayout_5.addWidget(toolButton_3)
         verticalLayout.addWidget(widget_7)
         widget_8 = QWidget(widget_4)
@@ -107,6 +111,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_6.addItem(horizontalSpacer_5)
         toolButton_4 = QToolButton(widget_8)
         toolButton_4.setObjectName(f"toolButton_4#{self.qid}")
+        toolButton_4.clicked.connect(partial(self.editOption,toolButton_4.objectName()))
         horizontalLayout_6.addWidget(toolButton_4)
         verticalLayout.addWidget(widget_8)
         verticalLayout_2.addWidget(widget_4)
@@ -133,8 +138,8 @@ class Ui_MainWindow(QMainWindow):
         self.scrollAreaWidgetContents.layout().addWidget(wid)
         questionEdit.setPlaceholderText(u"Question")
         scoreEdit.setPlaceholderText(u"Score", )
-        opt1.setText(u"Option 1")
-        toolButton.setText(u"...")
+        opt_1.setText(u"Option 1")
+        toolButton_1.setText(u"...")
         opt_2.setText(u"Option 2")
         toolButton_2.setText(u"...")
         opt_3.setText(u"Option 3")
@@ -160,7 +165,22 @@ class Ui_MainWindow(QMainWindow):
         scoreEdit = self.scrollAreaWidgetContents.findChild(QLineEdit,f"scoreEdit#{id}")
         que = queEdit.toPlainText()
         score = scoreEdit.text().strip()
-        print(que,score)
+        opt1 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_1#{id}")
+        opt2 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_2#{id}")
+        opt3 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_3#{id}")
+        opt4 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_4#{id}")
+        options = {0:opt1.text().strip(),1:opt2.text().strip(),2:opt3.text().strip(),3:opt4.text().strip()}
+        answer = []
+        if(opt1.isChecked()):
+            answer.append(0)
+        if(opt2.isChecked()):
+            answer.append(1)
+        if(opt3.isChecked()):
+            answer.append(2)
+        if(opt4.isChecked()):
+            answer.append(3)
+        self.questions[id] = {"question":que,"options":options,"score":int(score),"answer":answer}
+        print(self.questions)
         doneObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton#{id}")
         doneObj.setVisible(False)
         cancelEditObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton_4#{id}")
@@ -196,6 +216,17 @@ class Ui_MainWindow(QMainWindow):
         editObj.setVisible(True)
         deleteObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton_2#{id}")
         deleteObj.setVisible(True)
+    def editOption(self,objname):
+        x = objname.find('_')
+        id1 = (objname[x+1:])
+        optno = int(objname[x+1])
+        x = objname.find('#')
+        id = int(objname[x+1:])
+        obj = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_{id1}")
+        opt, done = QInputDialog.getText(self, 'Edit Option', 'Enter Option Text')
+        if(done and opt.strip()!=""):
+            obj.setText(opt)
+        return
         
     def switchQuestionAdding(self):
         self.widget_3.setVisible(False)
@@ -208,6 +239,19 @@ class Ui_MainWindow(QMainWindow):
             self.widget_6.setVisible(True)
         else:
             self.widget_6.setVisible(False)
+    def sessionStartChanged(self):
+        duration = self.duration.text().strip()
+        try:
+            self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(int(duration)*60))
+        except:
+            self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
+    def durationChanged(self):
+        duration = self.duration.text().strip()
+        try:
+            self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(int(duration)*60))
+        except:
+            self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
+        
     def publishQuiz(self):
         quizNickName = self.sessionNickName.text().strip()
         err = ""
@@ -216,12 +260,27 @@ class Ui_MainWindow(QMainWindow):
         duration = self.duration.text().strip()
         if(duration==""):
             err+="Duration must not be blank\n"
-        elif(duration.isNumeric()==False):
+        elif(duration.isnumeric()==False):
             err+="Duration must be a number.\n"
+        if(self.isTimeConstrained.isChecked()):
+            if(self.sessionStart.dateTime().addSecs(int(duration)*60)>self.sessionEnd.dateTime()):
+                err+="Time constraint invalid.\n"
+                self.sessionStart.setMinimumDateTime(QDateTime.currentDateTime())
+                self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
+            start = self.sessionStart.dateTime().toString()
+            end = self.sessionEnd.dateTime().toString()
+            start = parser.parse(start)
+            end = parser.parse(end)
+            print(start,end)
+
+    def logOut(self):
+        self.mwin.close()
+        
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(768, 406)
+        self.mwin = MainWindow
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_3 = QVBoxLayout(self.centralwidget)
@@ -244,6 +303,7 @@ class Ui_MainWindow(QMainWindow):
         icon = QIcon()
         icon.addFile(u"Images/logout.png", QSize(), QIcon.Normal, QIcon.Off)
         self.logOutButton.setIcon(icon)
+        self.logOutButton.clicked.connect(self.logOut)
 
         self.horizontalLayout.addWidget(self.logOutButton)
 
@@ -285,6 +345,21 @@ class Ui_MainWindow(QMainWindow):
 
         self.verticalLayout_2.addWidget(self.widget_4)
 
+        self.widget_7 = QWidget(self.widget_3)
+        self.widget_7.setObjectName(u"widget_7")
+        self.horizontalLayout_5 = QHBoxLayout(self.widget_7)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.duration = QLineEdit(self.widget_7)
+        self.duration.setObjectName(u"duration")
+        self.duration.textChanged.connect(self.durationChanged)
+        self.horizontalLayout_5.addWidget(self.duration)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
+
+
+        self.verticalLayout_2.addWidget(self.widget_7)
         self.widget_5 = QWidget(self.widget_3)
         self.widget_5.setObjectName(u"widget_5")
         self.horizontalLayout_4 = QHBoxLayout(self.widget_5)
@@ -309,7 +384,8 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionStart = QDateTimeEdit(self.widget_6)
         self.sessionStart.setObjectName(u"sessionStart")
-
+        self.sessionStart.setMinimumDateTime(QDateTime.currentDateTime())
+        self.sessionStart.dateTimeChanged.connect(self.sessionStartChanged)
         self.horizontalLayout_3.addWidget(self.sessionStart)
 
         self.label_2 = QLabel(self.widget_6)
@@ -319,7 +395,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionEnd = QDateTimeEdit(self.widget_6)
         self.sessionEnd.setObjectName(u"sessionEnd")
-
+        self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
         self.horizontalLayout_3.addWidget(self.sessionEnd)
 
 
@@ -327,23 +403,8 @@ class Ui_MainWindow(QMainWindow):
 
 
         self.verticalLayout_2.addWidget(self.widget_5)
-        self.widegt_6.setVisible(False)
+        self.widget_6.setVisible(False)
         self.isTimeConstrained.stateChanged.connect(self.timeConstrain)
-        self.widget_7 = QWidget(self.widget_3)
-        self.widget_7.setObjectName(u"widget_7")
-        self.horizontalLayout_5 = QHBoxLayout(self.widget_7)
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.duration = QLineEdit(self.widget_7)
-        self.duration.setObjectName(u"duration")
-
-        self.horizontalLayout_5.addWidget(self.duration)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
-
-
-        self.verticalLayout_2.addWidget(self.widget_7)
 
         self.verticalSpacer = QSpacerItem(20, 132, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -365,6 +426,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.publishButton = QPushButton(self.widget_8)
         self.publishButton.setObjectName(u"publishButton")
+        self.publishButton.clicked.connect(self.publishQuiz)
 
         self.horizontalLayout_6.addWidget(self.publishButton)
 

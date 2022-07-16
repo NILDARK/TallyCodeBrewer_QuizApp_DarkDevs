@@ -1,6 +1,6 @@
 import pymongo
 import datetime
-
+import bson
 def addQuizAdmin(details):
     try:
         client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
@@ -26,6 +26,22 @@ def verifyUsername(username):
     except Exception as err:
         print(err)
         return [False,None]
+def checkEmailAvaibility(email):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        col = db["quizAdmins"]
+        query = {"email":email}
+        res = col.find(query)   
+        for x in res:
+            return False
+        else:
+            return True
+    except Exception as err:
+        print(err)
+        return None
+def addQuestions(questions):
+    pass
 if __name__=="__main__":
     client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
     db = client.get_database('quiz')

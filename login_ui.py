@@ -154,7 +154,14 @@ class Ui_loginSection(QWidget):
             print(ex)
             return False
     def validateEmail(self,email,name):
-        print(email)
+        email_aval = db.checkEmailAvaibility(email)
+        if(email_aval==None):
+            QMessageBox.critical(self,"Connection Error","Something went wrong. Please check internet connection and try later.")
+            return None
+        elif(email_val==False):
+            QMessageBox.critical(self,"Database Error","Email Already in use. Try Using another email or login with username associated with it.")
+            self.signUpCred2.clear()
+            return None
         sent_vercode = rstr.xeger(r'[0-9]{6}')
         print(sent_vercode)
         if(self.sendEmail(email,sent_vercode,name)):

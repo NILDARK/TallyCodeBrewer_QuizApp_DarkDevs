@@ -70,6 +70,6 @@
 #     dialog.show()
 
 #     app.exec_()
-s = "abc#23"
-x= s.find('#')
-print(s[x+1:])
+import bson
+print(bson.ObjectId())
+x = "62d28013bc243a0278354130"
