@@ -11,6 +11,7 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+import re
 
 
 class Ui_Form(object):
@@ -176,7 +177,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.questionEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Question", None))
-        self.scoreEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Score", None))
+        self.scoreEdit.setPlaceholderText(QCoreApplication.translate("Form", u"Score (Default 1)", None))
         self.opt1.setText(QCoreApplication.translate("Form", u"Option 1", None))
         self.toolButton.setText(QCoreApplication.translate("Form", u"...", None))
         self.opt_2.setText(QCoreApplication.translate("Form", u"Option 2", None))
@@ -189,3 +190,36 @@ class Ui_Form(object):
         self.pushButton.setText(QCoreApplication.translate("Form", u"Done", None))
     # retranslateUi
 
+    def validateQuestion(self, question):
+        err = ""
+        if(question == ""):
+            err = "Question cannot be blank \n" 
+        if(len(question) > 500):
+            err += "Question cannot have more than 500 characters \n"
+        if(err!=""):
+            return [False,err]
+        else:
+            return [True,err] 
+
+    def validateOption(self, option):
+        err = ""
+        if(option == ""):
+            err = "Option cannot be blank \n" 
+        if(len(option) > 100):
+            err += "Option cannot have more than 100 characters \n"
+        if(err!=""):
+            return [False,err]
+        else:
+            return [True,err] 
+
+    def validateScore(self, score):
+        err = ""
+        if(score < 0):
+            err = "Score cannot be negative"
+        x = re.search("[a-zA-Z]",score)
+        if(x != None):
+            err += "Score cannot contain alphabets"
+        if(err!=""):
+            return [False,err]
+        else:
+            return [True,err] 

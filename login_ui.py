@@ -697,7 +697,7 @@ class Ui_loginSection(QWidget):
 #if QT_CONFIG(tooltip)
         self.quizCodeEdit.setToolTip(QCoreApplication.translate("loginSection", u"Enter Valid Quiz Code", None))
 #endif // QT_CONFIG(tooltip)
-        self.quizCodeEdit.setPlaceholderText(QCoreApplication.translate("loginSection", u"Quiz Code (V1F0-B2P4-N2K0)", None))
+        self.quizCodeEdit.setPlaceholderText(QCoreApplication.translate("loginSection", u"Quiz Code (V1F0-B2P4)", None))
 #if QT_CONFIG(tooltip)
         self.exitButton.setToolTip(QCoreApplication.translate("loginSection", u"Exit Application", None))
 #endif // QT_CONFIG(tooltip)

@@ -484,12 +484,18 @@ class Ui_MainWindow(QMainWindow):
         self.addQuestionButton = QPushButton(self.widget_8)
         self.addQuestionButton.setObjectName(u"addQuestionButton")
         self.addQuestionButton.clicked.connect(self.switchQuestionAdding)
+        icon10 = QIcon()
+        icon10.addFile(u"Images/add.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.addQuestionButton.setIcon(icon10)
         
         self.horizontalLayout_6.addWidget(self.addQuestionButton)
 
         self.publishButton = QPushButton(self.widget_8)
         self.publishButton.setObjectName(u"publishButton")
         self.publishButton.clicked.connect(self.publishQuiz)
+        icon11 = QIcon()
+        icon11.addFile(u"Images/publishing.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.publishButton.setIcon(icon11)
 
         self.horizontalLayout_6.addWidget(self.publishButton)
 
@@ -526,24 +532,36 @@ class Ui_MainWindow(QMainWindow):
         self.backToQuizSettings = QPushButton(self.widget_10)
         self.backToQuizSettings.setObjectName(u"backToQuizSettings")
         self.backToQuizSettings.clicked.connect(self.switchQuizSettings)
+        icon12 = QIcon()
+        icon12.addFile(u"Images/back.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.backToQuizSettings.setIcon(icon12)
 
         self.horizontalLayout_7.addWidget(self.backToQuizSettings)
         self.addQueButton = QPushButton(self.widget_10)
         self.addQueButton.setText("Add Question")
         self.addQueButton.clicked.connect(self.addQuestion)
         self.addQueButton.setObjectName(u"addQueButton")
+        icon13 = QIcon()
+        icon13.addFile(u"Images/add.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.addQueButton.setIcon(icon13)
 
         self.horizontalLayout_7.addWidget(self.addQueButton)
 
         self.resetAllQuestions = QPushButton(self.widget_10)
         self.resetAllQuestions.setObjectName(u"resetAllQuestions")
         self.resetAllQuestions.clicked.connect(self.reset)
+        icon14 = QIcon()
+        icon14.addFile(u"Images/reset.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.resetAllQuestions.setIcon(icon14)
 
         self.horizontalLayout_7.addWidget(self.resetAllQuestions)
 
         self.doneAddingButton = QPushButton(self.widget_10)
         self.doneAddingButton.setObjectName(u"doneAddingButton")
         self.doneAddingButton.clicked.connect(self.switchQuizSettings)
+        icon15 = QIcon()
+        icon15.addFile(u"Images/done.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.doneAddingButton.setIcon(icon15)
 
         self.horizontalLayout_7.addWidget(self.doneAddingButton)
 
