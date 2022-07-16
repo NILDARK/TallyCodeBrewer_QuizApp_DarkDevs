@@ -317,6 +317,7 @@ class Ui_MainWindow(QMainWindow):
                 return
         
         res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
+        print(res)
         if(res[0]):
             print("Published Successfully",res[1])
             self.resetAll()

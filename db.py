@@ -67,7 +67,10 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
             a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
         session_code = a
         session_nickname = nickname
-        duration = int(duration)
+        try:
+            duration = int(duration)
+        except:
+            duration = 10
         status = False
         invites = {}
         session_owner = username
@@ -77,6 +80,10 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
             d = {}
             d["question"]=x["question"]
             d["score"]=x["score"]
+            try:
+                d["score"]=int(d["score"])
+            except:
+                d["score"]=1
             options = {}
             ansindx = x["answer"][0]
             for k,val in x["options"].items():
