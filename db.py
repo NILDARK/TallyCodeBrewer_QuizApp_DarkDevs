@@ -123,8 +123,12 @@ def addParticipant(session_code,participantName,completionStatus=False,score=Non
         db = client.get_database('quiz')
         col = db["sessions"]
         query = {"session_code":session_code}
+        res = col.find(query)
+        for y in res:
+            x = y["participants"]
         pcode = str(bson.ObjectId())
-        new = {"$set":{"participants":{pcode:{"participantName":participantName,"completionStatus":completionStatus,"score":score}}}}
+        x[pcode]={"participantName":participantName,"completionStatus":completionStatus,"score":score}
+        new = {"$set":{"participants":y}}
         col.update_one(query,new)   
         return pcode
     except Exception as err:
