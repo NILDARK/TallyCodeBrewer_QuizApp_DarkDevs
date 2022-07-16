@@ -34,12 +34,9 @@ class Ui_MainWindow(QMainWindow):
         verticalLayout_2 = QVBoxLayout(widget)
         verticalLayout_2.setObjectName(f"verticalLayout_2#{self.qid}")
         widget_2 = QWidget(widget)
-        widget_2.setObjectName(f"widget_2{self.qid}")
+        widget_2.setObjectName(f"widget_2#{self.qid}")
         horizontalLayout = QHBoxLayout(widget_2)
         horizontalLayout.setObjectName(f"horizontalLayout#{self.qid}")
-        # qidLabel = QLabel(widget_2)
-        # qidLabel.setObjectName()
-        # qidLabel.setText(str(self.qid+1))
         questionEdit = QPlainTextEdit(widget_2)
         questionEdit.setObjectName(f"questionEdit#{self.qid}")
         horizontalLayout.addWidget(questionEdit)
@@ -121,6 +118,9 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_7.setObjectName(f"horizontalLayout_7#{self.qid}")
         horizontalSpacer_6 = QSpacerItem(161, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_7.addItem(horizontalSpacer_6)
+        widget_2.setEnabled(False)
+        widget_3.setEnabled(False)
+        widget_4.setEnabled(False)
         pushButton_2 = QPushButton(widget_9)
         pushButton_2.setObjectName(f"pushButton_2#{self.qid}")
         horizontalLayout_7.addWidget(pushButton_2)
@@ -158,6 +158,10 @@ class Ui_MainWindow(QMainWindow):
         pushButton_2.clicked.connect(partial(self.deleteQue,pushButton.objectName()))
         pushButton_3.clicked.connect(partial(self.edit,pushButton.objectName()))
         pushButton_4.clicked.connect(partial(self.cancelEdit,pushButton.objectName()))
+    def reset(self):
+        layout = self.scrollAreaWidgetContents.layout()
+        for i in reversed(range(layout.count())): 
+            layout.itemAt(i).widget().setParent(None)
     def add(self,objname):
         x = objname.find('#')
         id = int(objname[x+1:])
@@ -183,6 +187,12 @@ class Ui_MainWindow(QMainWindow):
             score = "1"
         self.questions[id] = {"question":que,"options":options,"score":int(score),"answer":answer}
         print(self.questions)
+        wid_2 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_2#{id}")
+        wid_3 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_3#{id}")
+        wid_4 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_4#{id}")
+        wid_2.setEnabled(False)
+        wid_3.setEnabled(False)
+        wid_4.setEnabled(False)
         doneObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton#{id}")
         doneObj.setVisible(False)
         cancelEditObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton_4#{id}")
@@ -199,6 +209,12 @@ class Ui_MainWindow(QMainWindow):
     def edit(self,objname):
         x = objname.find('#')
         id = int(objname[x+1:])
+        wid_2 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_2#{id}")
+        wid_3 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_3#{id}")
+        wid_4 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_4#{id}")
+        wid_2.setEnabled(True)
+        wid_3.setEnabled(True)
+        wid_4.setEnabled(True)
         doneObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton#{id}")
         doneObj.setVisible(True)
         cancelEditObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton_4#{id}")
@@ -210,6 +226,12 @@ class Ui_MainWindow(QMainWindow):
     def cancelEdit(self,objname):
         x = objname.find('#')
         id = int(objname[x+1:])
+        wid_2 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_2#{id}")
+        wid_3 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_3#{id}")
+        wid_4 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_4#{id}")
+        wid_2.setEnabled(False)
+        wid_3.setEnabled(False)
+        wid_4.setEnabled(False)
         doneObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton#{id}")
         doneObj.setVisible(False)
         cancelEditObj = self.scrollAreaWidgetContents.findChild(QPushButton,f"pushButton_4#{id}")
@@ -260,9 +282,7 @@ class Ui_MainWindow(QMainWindow):
         if(quizNickName==""):
             err+="Nick Name must not be blank.\n"
         duration = self.duration.text().strip()
-        if(duration==""):
-            err+="Duration must not be blank\n"
-        elif(duration.isnumeric()==False):
+        if(duration!="" and duration.isnumeric()==False):
             err+="Duration must be a number.\n"
         if(self.isTimeConstrained.isChecked()):
             if(self.sessionStart.dateTime().addSecs(int(duration)*60)>self.sessionEnd.dateTime()):
@@ -274,16 +294,37 @@ class Ui_MainWindow(QMainWindow):
             start = parser.parse(start)
             end = parser.parse(end)
             print(start,end)
+        if(len(self.questions)==0):
+            err+="You have not added questions or may not have valid inputs. Try Adding or editing added questions.\n"
         if(err!=""):
             QMessageBox.critical(self,"Error",err)
             return
+        if(duration==""):
+            alert = QMessageBox()
+            alert.setIcon(QMessageBox.Warning)
+            alert.setInformativeText("You have not set duration for quiz, by default it is set to 10 minutes. Do You want to continue?")
+            alert.setWindowTitle("Error")
+            alert.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+            cancel_button = alert.button(QMessageBox.Cancel)
+            cancel_button.setText("No")
+            ok_button = alert.button(QMessageBox.Ok)
+            ok_button.setText("Yes")
+            res = alert.exec_()
+            if(res==4194304):
+                return
         res = db.publishQuiz(self.questions,quizNickName,duration,start,end,self.username)
         if(res[0]):
             print("Published Successfully",res[1])
+            self.resetAll()
         else:
             print("failed")
     def logOut(self):
         self.mwin.close()
+    def resetAll(self):
+        self.reset()
+        self.sessionNickName.clear()
+        self.duration.clear()
+        self.isTimeConstrained.setChecked(False)
         
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
@@ -483,11 +524,13 @@ class Ui_MainWindow(QMainWindow):
 
         self.resetAllQuestions = QPushButton(self.widget_10)
         self.resetAllQuestions.setObjectName(u"resetAllQuestions")
+        self.resetAllQuestions.clicked.connect(self.reset)
 
         self.horizontalLayout_7.addWidget(self.resetAllQuestions)
 
         self.doneAddingButton = QPushButton(self.widget_10)
         self.doneAddingButton.setObjectName(u"doneAddingButton")
+        self.doneAddingButton.clicked.connect(self.switchQuizSettings)
 
         self.horizontalLayout_7.addWidget(self.doneAddingButton)
 

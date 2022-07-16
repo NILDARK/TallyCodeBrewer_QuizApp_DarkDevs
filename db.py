@@ -1,6 +1,6 @@
 import pymongo
 import datetime
-# import bson
+import bson
 import rstr
 import re
 def addQuizAdmin(details):
@@ -50,6 +50,7 @@ def checkSessionCode(a):
         query = {"session_code":a}
         res = col.find(query)   
         for x in res:
+            print(x)
             return False
         else:
             return True
@@ -62,7 +63,7 @@ def publishQuiz(questions,nickname,duration,start,end,username):
         db = client.get_database('quiz')
         col = db["sessions"]
         a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
-        while(checkSessionCode(a)):
+        while(checkSessionCode(a)==False):
             a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
         session_code = a
         session_nickname = nickname
@@ -72,14 +73,14 @@ def publishQuiz(questions,nickname,duration,start,end,username):
         session_owner = username
         ques = {}
         for x in questions.values():
-            qid = bson.ObjectId()
+            qid = str(bson.ObjectId())
             d = {}
             d["question"]=x["question"]
             d["score"]=x["score"]
             options = {}
             ansindx = x["answer"][0]
             for k,val in x["options"].items():
-                optid = bson.ObjectId()
+                optid = str(bson.ObjectId())
                 options[optid]=val
                 if(k==ansindx):
                     try:
