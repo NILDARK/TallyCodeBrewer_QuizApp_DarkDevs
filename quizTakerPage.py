@@ -13,6 +13,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 import enum
 import random
+import db
 class TimerStatus(enum.Enum):
     init, counting, paused = 1, 2, 3
 class Ui_QuizPlatform(QMainWindow):
@@ -79,12 +80,22 @@ class Ui_QuizPlatform(QMainWindow):
             self.curQues=self.totalQues-1
         self.showQuestion()
     def submitQuiz(self):
-        self.evaluateQuiz()
+        self._left_seconds = 0
+        self.score = self.evaluateQuiz()
+        self.completionStatus = True
+        res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
+        if(res):
+            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. And you attempted {len(self.response)} questions out of {self.totalQues}.")
+            self.exit()
+            return
+        else:
+            QMessageBox.critical(self,"Error","Sorry, didn't able to submit your responses, may be due to internet connectivity issue.")
+            self.exit()
+            return
         
-        pass
     def evaluateQuiz(self):
         totalScore = 0
-        self.score = 0
+        score = 0
         for i in range(self.totalQues):
             question = self.questions[self.queDisplayArr[self.curQues]]
             totalScore+=int(question["score"])
@@ -92,7 +103,8 @@ class Ui_QuizPlatform(QMainWindow):
             question = self.questions[q]
             cor = question["answer"][0]
             if(resp==cor):
-                self.score+=int(question["score"])
+                score+=int(question["score"])
+        return [score,totalScore]
     def resetSelection(self):
         resp = self.optionsGroup.checkedId()
         self.response[self.queDisplayArr[self.curQues]]=-1
@@ -102,11 +114,13 @@ class Ui_QuizPlatform(QMainWindow):
             self._left_seconds -= 1
             self.showTime()
         else:
-            print("Khatam")
             self.timer.stop()
             self.showTime()
             self._status = TimerStatus.init
             self._left_seconds = self.session["duration"] * 60
+            QMessageBox.information(self,"Info","Out of Time. Submitting your responses.")
+            self.submitQuiz()
+            
     def _start_event(self):
         if (self._status == TimerStatus.init or self._status == TimerStatus.paused) and self._left_seconds > 0:
             self._left_seconds -= 1
@@ -223,6 +237,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.submitQuizButton = QPushButton(self.widget_5)
         self.submitQuizButton.setObjectName(u"submitQuizButton")
         self.submitQuizButton.setVisible(False)
+        self.submitQuizButton.clicked.connect(self.submitQuiz)
         self.horizontalLayout.addWidget(self.submitQuizButton)
 
         self.instructionsIcon = QPushButton(self.widget_5)

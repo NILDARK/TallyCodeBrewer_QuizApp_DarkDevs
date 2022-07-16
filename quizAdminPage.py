@@ -282,10 +282,12 @@ class Ui_MainWindow(QMainWindow):
         if(quizNickName==""):
             err+="Nick Name must not be blank.\n"
         duration = self.duration.text().strip()
-        if(duration!="" and duration.isnumeric()==False):
-            err+="Duration must be a number.\n"
-        else:
+        if(duration==""):
             duration = 10
+        elif(duration.isnumeric()==False or int(duration)==0):
+            err+="Duration must be a positive number greater than 0.\n"
+        else:
+            duration = int(duration)
         if(self.isTimeConstrained.isChecked()):
             if(self.sessionStart.dateTime().addSecs(int(duration)*60)>self.sessionEnd.dateTime()):
                 err+="Time constraint invalid.\n"
@@ -326,6 +328,9 @@ class Ui_MainWindow(QMainWindow):
         else:
             print("failed")
     def logOut(self):
+        res = db.logOut(self.username,False)
+        if(res):
+            QMessageBox.information(self,"Info","Logged out Successfully.")
         self.mwin.close()
     def resetAll(self):
         self.reset()
