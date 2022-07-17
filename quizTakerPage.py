@@ -90,7 +90,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.completionStatus = True
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
         if(res):
-            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \n You attempted {len(self.response)} questions out of {self.totalQues}.")
+            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \n You attempted {score[2]} questions out of {self.totalQues}.")
             self.exit()
             return
         else:
@@ -101,6 +101,7 @@ class Ui_QuizPlatform(QMainWindow):
     def evaluateQuiz(self):
         totalScore = 0
         score = 0
+        attempted = 0
         for i in range(self.totalQues):
             question = self.questions[self.queDisplayArr[i]]
             totalScore+=int(question["score"])
@@ -109,7 +110,11 @@ class Ui_QuizPlatform(QMainWindow):
             cor = question["answer"][0]
             if(resp==cor):
                 score+=int(question["score"])
-        return [score,totalScore]
+                attempted+=1
+            elif(type(resp)==str):
+                attempted+=1
+            
+        return [score,totalScore,attempted]
     def resetSelection(self):
         resp = self.optionsGroup.checkedId()
         self.response[self.queDisplayArr[self.curQues]]=-1
