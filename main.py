@@ -1852,7 +1852,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.participantName = name
         self.session = session
         self.response = {}
-        self.score = None
+        self.score = -1
         self.completionStatus = False
         self.pcode = pcode
         self.questions = self.session["questions"]
