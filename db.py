@@ -149,7 +149,7 @@ def verifySessionCode(code):
     except Exception as err:
         print(err)
         return [None,None]
-def addParticipant(session_code,participantName,completionStatus=False,score=None):
+def addParticipant(session_code,participantName,completionStatus=False,score=-1):
     try:
         client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
@@ -166,7 +166,7 @@ def addParticipant(session_code,participantName,completionStatus=False,score=Non
     except Exception as err:
         print(err)
         return None
-def updateParticipant(session_code,pcode,completionStatus=False,score=None):
+def updateParticipant(session_code,pcode,completionStatus=False,score=-1):
     try:
         client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
