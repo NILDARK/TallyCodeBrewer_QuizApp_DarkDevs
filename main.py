@@ -1049,13 +1049,13 @@ class Ui_MainWindow(QMainWindow):
         else:
             self.widget_6.setVisible(False)
     def sessionStartChanged(self):
-        duration = self.duration.text().strip()
+        duration = self.duration.value()
         try:
             self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(int(duration)*60))
         except:
             self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
     def durationChanged(self):
-        duration = self.duration.text().strip()
+        duration = self.duration.value()
         try:
             self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(int(duration)*60))
         except:
@@ -1066,15 +1066,8 @@ class Ui_MainWindow(QMainWindow):
         err = ""
         if(quizNickName==""):
             err+="Nick Name must not be blank.\n"
-        duration = self.duration.text().strip()
-        if(duration==""):
-            duration = 10
-        elif(duration.isnumeric()==False or int(duration)==0):
-            err+="Duration must be a positive number greater than 0.\n"
-        elif(int(duration)>359940):
-            err+="Duration must be less than or equal to 359940 minutes, i.e. 99:59:00 hours.\n"
-        else:
-            duration = int(duration)
+        duration = self.duration.value()
+        
         if(self.isTimeConstrained.isChecked()):
             if(self.sessionStart.dateTime().addSecs(int(duration)*60)>self.sessionEnd.dateTime()):
                 err+="Time constraint invalid.\n"
@@ -1125,7 +1118,7 @@ class Ui_MainWindow(QMainWindow):
     def resetAll(self):
         self.reset()
         self.sessionNickName.clear()
-        self.duration.clear()
+        self.duration.setValue(10)
         self.isTimeConstrained.setChecked(False)
     def sessionCodeRadioToggled(self):
         self.searchBar.clear()
@@ -1609,11 +1602,17 @@ class Ui_MainWindow(QMainWindow):
         self.widget_7.setObjectName(u"widget_7")
         self.horizontalLayout_5 = QHBoxLayout(self.widget_7)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.duration = QLineEdit(self.widget_7)
+        # self.duration = QLineEdit(self.widget_7)
+        self.xLabel = QLabel(self.widget_7)
+        self.xLabel.setText("Duration in Minutes")
+        self.horizontalLayout_5.addWidget(self.xLabel)
+        
+        self.duration = QSpinBox(self.widget_7)
         self.duration.setObjectName(u"duration")
-        self.duration.textChanged.connect(self.durationChanged)
         self.horizontalLayout_5.addWidget(self.duration)
-
+        self.duration.setMinimum(1)
+        self.duration.setMaximum(359940)
+        self.duration.setValue(10)
         self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
@@ -1664,6 +1663,7 @@ class Ui_MainWindow(QMainWindow):
         self.sessionEnd.setMinimumDateTime(self.sessionStart.dateTime().addSecs(10*60))
         self.horizontalLayout_3.addWidget(self.sessionEnd)
 
+        self.duration.valueChanged.connect(self.durationChanged)
 
         self.horizontalLayout_4.addWidget(self.widget_6)
 
@@ -1821,7 +1821,7 @@ class Ui_MainWindow(QMainWindow):
         self.isTimeConstrained.setText(QCoreApplication.translate("MainWindow", u"Time Constrained", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"End", None))
-        self.duration.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Duration in Minutes (10 by default)", None))
+        self.duration.setToolTip(QCoreApplication.translate("MainWindow", u"Duration in Minutes (10 by default)", None))
         self.addQuestionButton.setText(QCoreApplication.translate("MainWindow", u"Add Questions", None))
         self.publishButton.setText(QCoreApplication.translate("MainWindow", u"Publish Quiz", None))
         self.backToQuizSettings.setText(QCoreApplication.translate("MainWindow", u"Back", None))
