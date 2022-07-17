@@ -926,7 +926,7 @@ class Ui_MainWindow(QMainWindow):
         icon2 = QIcon()
         icon2.addFile(u"Images/cancel.png", QSize(), QIcon.Normal, QIcon.Off)
         pushButton_4.setIcon(icon2)
-        pushButton.setText(u"Done Edit")
+        pushButton.setText(u"Save Question")
         icon3 = QIcon()
         icon3.addFile(u"Images/done.png", QSize(), QIcon.Normal, QIcon.Off)
         pushButton.setIcon(icon3)
@@ -1162,6 +1162,8 @@ class Ui_MainWindow(QMainWindow):
         start = res["session_start"]
         end = res["session_end"]
         participants = res["participants"]
+        participants = {k:v for k,v in sorted(participants.items(),key=lambda x:x[1]["score"],reverse=True)}
+        total = res["total_score"]
         self.nickNameDisplay.setText(nickName)
         self.durationDisplay.setText(duration)
         self.quizCodeDisplay.setText(session_code)
@@ -1180,7 +1182,7 @@ class Ui_MainWindow(QMainWindow):
             item1.setTextAlignment(Qt.AlignCenter)
             if(participant["completionStatus"]):
                 x = "Successfully Attempted"
-                score = str(participant["score"])
+                score = str(participant["score"])+" out of "+str(total)
             else:
                 x = "Not Attempted/Unsuccessfull Attempt"
                 score = "Not Available"
@@ -1563,7 +1565,7 @@ class Ui_MainWindow(QMainWindow):
         item.setBackground(QColor(135, 155, 161))
         item.setText("Score")
         self.participantsList.setHorizontalHeaderItem(2, item)
-        self.participantsList.horizontalHeader().setDefaultSectionSize(600)
+        self.participantsList.horizontalHeader().setDefaultSectionSize(380)
         self.horizontalLayout_17.addWidget(self.participantsList)
 
 

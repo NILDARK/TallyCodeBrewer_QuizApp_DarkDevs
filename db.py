@@ -105,6 +105,7 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
         invites = {}
         session_owner = username
         ques = {}
+        total = 0
         for x in questions.values():
             qid = str(bson.ObjectId())
             d = {}
@@ -114,6 +115,7 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
                 d["score"]=int(d["score"])
             except:
                 d["score"]=1
+            total+=d["score"]
             options = {}
             ansindx = x["answer"][0]
             for k,val in x["options"].items():
@@ -127,7 +129,7 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
             d["options"]=options
             d["isMul"]=False
             ques[qid]=d
-        record = {"session_code":session_code,"session_owner":session_owner,"session_nickname":session_nickname,"session_start":start,"session_end":end,"duration":duration,"questions":ques,"status":status,"participants":{},"isRestricted":False,"invites":{}}
+        record = {"session_code":session_code,"session_owner":session_owner,"session_nickname":session_nickname,"session_start":start,"session_end":end,"duration":duration,"questions":ques,"status":status,"participants":{},"isRestricted":False,"invites":{},"total_score":total}
         col.insert_one(record)
         return [True,session_code]
     except Exception as err:
@@ -198,7 +200,7 @@ def getAllSessions(username,active=False):
                     pass
                 elif(curtime>=end or curtime<start):
                     continue
-            ret[x["session_code"]]={"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
+            ret[x["session_code"]]={"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"],"total_score":x["total_score"]}
         return ret
     except Exception as err:
         print(err)
@@ -212,7 +214,7 @@ def getSessionInfo(session_code):
         res = sessions.find(query)
         ret = {}
         for x in res:
-            return {"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
+            return {"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"],"total_score":x["total_score"]}
     except Exception as err:
         print(err)
         return None
