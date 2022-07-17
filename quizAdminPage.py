@@ -16,13 +16,18 @@ from dateutil import parser
 import db
 
 class Ui_MainWindow(QMainWindow):
+    def closeEvent(self,event):
+        print("HI")
+        res = db.logOut(self.username,False)
+        if(res):
+            QMessageBox.information(self,"Info","Logged out Successfully.")
+        event.accept()
     def __init__(self,username):
         QMainWindow.__init__(self)
         self.username = username
         self.qid = 0
         self.questions = {}
-        
-        
+        self.sessions = {}
     def addQuestion(self):
         self.qid+=1
         wid = QWidget()
@@ -186,7 +191,6 @@ class Ui_MainWindow(QMainWindow):
         if(score==""):
             score = "1"
         self.questions[id] = {"question":que,"options":options,"score":int(score),"answer":answer}
-        print(self.questions)
         wid_2 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_2#{id}")
         wid_3 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_3#{id}")
         wid_4 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_4#{id}")
@@ -321,7 +325,6 @@ class Ui_MainWindow(QMainWindow):
                 return
         
         res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
-        print(res)
         if(res[0]):
             print("Published Successfully",res[1])
             self.resetAll()
@@ -337,7 +340,30 @@ class Ui_MainWindow(QMainWindow):
         self.sessionNickName.clear()
         self.duration.clear()
         self.isTimeConstrained.setChecked(False)
-        
+    def sessionCodeRadioToggled(self):
+        self.searchBar.clear()
+        self.searchBar.setPlaceholderText("Enter Session Code")
+
+    def nickNameRadioToggled(self):
+        self.searchBar.clear()
+        self.searchBar.setPlaceholderText("Enter Session Name")
+    def addAllSessionsToList(self):
+        self.allSessionDetails = db.getAllSessions(self.username)
+        self.sessionList.clearContents()
+        self.sessionList.setRowCount(0)
+        self.sessionList.setRowCount(len(self.allSessionDetails))
+        row = 0
+        for session_code,session in self.allSessionDetails.items():
+            item1 = QTableWidgetItem(session_code)
+            item1.setTextAlignment(Qt.AlignCenter)
+            item2 = QTableWidgetItem(session["session_nickname"])
+            item2.setTextAlignment(Qt.AlignCenter)
+            item3 = QTableWidgetItem(str(session["duration"]))
+            item3.setTextAlignment(Qt.AlignCenter)
+            self.sessionList.setItem(row, 0, item1)
+            self.sessionList.setItem(row, 1, item2)
+            self.sessionList.setItem(row, 2, item3)
+            row+=1
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
@@ -382,6 +408,234 @@ class Ui_MainWindow(QMainWindow):
         self.tabWidget.setElideMode(Qt.ElideNone)
         self.manageQuizTab = QWidget()
         self.manageQuizTab.setObjectName(u"manageQuizTab")
+        
+        self.verticalLayout_7 = QVBoxLayout(self.manageQuizTab)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.widget_13 = QWidget(self.manageQuizTab)
+        self.widget_13.setObjectName(u"widget_13")
+        self.horizontalLayout_10 = QHBoxLayout(self.widget_13)
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.horizontalSpacer_7 = QSpacerItem(651, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_10.addItem(self.horizontalSpacer_7)
+
+        self.pushButton = QPushButton(self.widget_13)
+        self.pushButton.setObjectName(u"pushButton")
+
+        self.horizontalLayout_10.addWidget(self.pushButton)
+
+
+        self.verticalLayout_7.addWidget(self.widget_13)
+
+        self.widget_14 = QWidget(self.manageQuizTab)
+        self.widget_14.setObjectName(u"widget_14")
+        self.horizontalLayout_18 = QHBoxLayout(self.widget_14)
+        self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
+        self.widget_11 = QWidget(self.widget_14)
+        self.widget_11.setObjectName(u"widget_11")
+        self.verticalLayout_9 = QVBoxLayout(self.widget_11)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.widget_15 = QWidget(self.widget_11)
+        self.widget_15.setObjectName(u"widget_15")
+        self.verticalLayout_5 = QVBoxLayout(self.widget_15)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.widget_16 = QWidget(self.widget_15)
+        self.widget_16.setObjectName(u"widget_16")
+        self.horizontalLayout_11 = QHBoxLayout(self.widget_16)
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.label_4 = QLabel(self.widget_16)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_11.addWidget(self.label_4)
+
+        self.sessionCodeRadio = QRadioButton(self.widget_16)
+        self.sessionCodeRadio.setObjectName(u"sessionCodeRadio")
+
+        self.horizontalLayout_11.addWidget(self.sessionCodeRadio)
+
+        self.nickNameRadio = QRadioButton(self.widget_16)
+        self.nickNameRadio.setObjectName(u"nickNameRadio")
+        self.sessionCodeRadio.setChecked(True)
+        self.horizontalLayout_11.addWidget(self.nickNameRadio)
+        self.sessionCodeRadio.toggled.connect(self.sessionCodeRadioToggled)
+        self.nickNameRadio.toggled.connect(self.nickNameRadioToggled)
+        self.activeCheck = QCheckBox(self.widget_16)
+        self.activeCheck.setObjectName(u"activeCheck")
+
+        self.horizontalLayout_11.addWidget(self.activeCheck)
+        self.sessions = db.getAllSessions(self.username,active=False)
+
+        self.verticalLayout_5.addWidget(self.widget_16)
+
+        self.widget_17 = QWidget(self.widget_15)
+        self.widget_17.setObjectName(u"widget_17")
+        self.horizontalLayout_12 = QHBoxLayout(self.widget_17)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.searchBar = QLineEdit(self.widget_17)
+        self.searchBar.setObjectName(u"searchBar")
+        self.searchBar.setStyleSheet(u"background-color: rgb(255, 255, 255);")
+        self.searchBar.setInputMethodHints(Qt.ImhUppercaseOnly)
+
+        self.horizontalLayout_12.addWidget(self.searchBar)
+
+
+        self.verticalLayout_5.addWidget(self.widget_17)
+
+        self.widget_19 = QWidget(self.widget_15)
+        self.widget_19.setObjectName(u"widget_19")
+        self.horizontalLayout_14 = QHBoxLayout(self.widget_19)
+        self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
+        self.searchButton = QPushButton(self.widget_19)
+        self.searchButton.setObjectName(u"searchButton")
+        self.searchButton.setEnabled(False)
+        self.searchButton.setCursor(QCursor(Qt.PointingHandCursor))
+        icon1 = QIcon()
+        icon1.addFile(u"../../../python projects/Challan Generator/Uis/search.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.searchButton.setIcon(icon1)
+
+        self.horizontalLayout_14.addWidget(self.searchButton)
+
+        self.horizontalSpacer_8 = QSpacerItem(214, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_14.addItem(self.horizontalSpacer_8)
+
+
+        self.verticalLayout_5.addWidget(self.widget_19)
+
+
+        self.verticalLayout_9.addWidget(self.widget_15)
+
+        # self.sessionList = QListWidget(self.widget_11)
+        # self.sessionList.setObjectName(u"sessionList")
+
+        self.sessionList = QTableWidget(self.widget_11)
+        self.sessionList.setObjectName(u"sessionList")
+        self.sessionList.setColumnCount(3)
+        self.sessionList.setRowCount(0)
+        self.sessionList.setFrameShape(QFrame.NoFrame)
+        self.sessionList.setFrameShadow(QFrame.Plain)
+        self.sessionList.verticalHeader().setVisible(False)
+        self.sessionList.setEditTriggers(
+            QAbstractItemView.NoEditTriggers)
+        self.sessionList.setDragDropOverwriteMode(False)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Session Code")
+        self.sessionList.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Session Nick Name")
+        self.sessionList.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Session Duration")
+        self.sessionList.setHorizontalHeaderItem(2, item)
+        self.sessionList.horizontalHeader().setDefaultSectionSize(600)
+
+        self.verticalLayout_9.addWidget(self.sessionList)
+        self.addAllSessionsToList()
+
+        self.horizontalLayout_18.addWidget(self.widget_11)
+
+        self.sessionDisplayWidget = QWidget(self.widget_14)
+        self.sessionDisplayWidget.setObjectName(u"sessionDisplayWidget")
+        self.verticalLayout_6 = QVBoxLayout(self.sessionDisplayWidget)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.sessionDetailsBox = QGroupBox(self.sessionDisplayWidget)
+        self.sessionDetailsBox.setObjectName(u"sessionDetailsBox")
+        self.verticalLayout_4 = QVBoxLayout(self.sessionDetailsBox)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.widget_18 = QWidget(self.sessionDetailsBox)
+        self.widget_18.setObjectName(u"widget_18")
+        self.horizontalLayout_13 = QHBoxLayout(self.widget_18)
+        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
+        self.nickNameDisplay = QLineEdit(self.widget_18)
+        self.nickNameDisplay.setObjectName(u"nickNameDisplay")
+        self.nickNameDisplay.setReadOnly(True)
+
+        self.horizontalLayout_13.addWidget(self.nickNameDisplay)
+
+        self.horizontalSpacer_9 = QSpacerItem(189, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_13.addItem(self.horizontalSpacer_9)
+
+
+        self.verticalLayout_4.addWidget(self.widget_18)
+
+        self.widget_20 = QWidget(self.sessionDetailsBox)
+        self.widget_20.setObjectName(u"widget_20")
+        self.horizontalLayout_15 = QHBoxLayout(self.widget_20)
+        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
+        self.durationDisplay = QLineEdit(self.widget_20)
+        self.durationDisplay.setObjectName(u"durationDisplay")
+        self.durationDisplay.setReadOnly(True)
+
+        self.horizontalLayout_15.addWidget(self.durationDisplay)
+
+        self.horizontalSpacer_10 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_15.addItem(self.horizontalSpacer_10)
+
+
+        self.verticalLayout_4.addWidget(self.widget_20)
+
+        self.timeConstraintDisplay = QWidget(self.sessionDetailsBox)
+        self.timeConstraintDisplay.setObjectName(u"timeConstraintDisplay")
+        self.horizontalLayout_16 = QHBoxLayout(self.timeConstraintDisplay)
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.label_3 = QLabel(self.timeConstraintDisplay)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_16.addWidget(self.label_3)
+
+        self.sessionStartDisplay = QDateTimeEdit(self.timeConstraintDisplay)
+        self.sessionStartDisplay.setObjectName(u"sessionStartDisplay")
+        self.sessionStartDisplay.setReadOnly(True)
+        self.sessionStartDisplay.setCalendarPopup(True)
+
+        self.horizontalLayout_16.addWidget(self.sessionStartDisplay)
+
+        self.label_5 = QLabel(self.timeConstraintDisplay)
+        self.label_5.setObjectName(u"label_5")
+
+        self.horizontalLayout_16.addWidget(self.label_5)
+
+        self.sessionEndDisplay = QDateTimeEdit(self.timeConstraintDisplay)
+        self.sessionEndDisplay.setObjectName(u"sessionEndDisplay")
+        self.sessionEndDisplay.setReadOnly(True)
+
+        self.horizontalLayout_16.addWidget(self.sessionEndDisplay)
+
+
+        self.verticalLayout_4.addWidget(self.timeConstraintDisplay)
+
+
+        self.verticalLayout_6.addWidget(self.sessionDetailsBox)
+
+        self.participantsBox = QGroupBox(self.sessionDisplayWidget)
+        self.participantsBox.setObjectName(u"participantsBox")
+        self.horizontalLayout_17 = QHBoxLayout(self.participantsBox)
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
+        self.participantsList = QTableWidget(self.participantsBox)
+        self.participantsList.setObjectName(u"participantsList")
+        self.participantsList.setFrameShape(QFrame.NoFrame)
+        self.participantsList.setFrameShadow(QFrame.Plain)
+        self.participantsList.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.horizontalLayout_17.addWidget(self.participantsList)
+
+
+        self.verticalLayout_6.addWidget(self.participantsBox)
+
+
+        self.horizontalLayout_18.addWidget(self.sessionDisplayWidget)
+
+
+        self.verticalLayout_7.addWidget(self.widget_14)
+        
         self.tabWidget.addTab(self.manageQuizTab, "")
         self.createQuizTab = QWidget()
         self.createQuizTab.setObjectName(u"createQuizTab")
@@ -587,7 +841,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -600,6 +854,24 @@ class Ui_MainWindow(QMainWindow):
         self.logOutButton.setToolTip(QCoreApplication.translate("MainWindow", u"Log Out of the Session", None))
 #endif // QT_CONFIG(tooltip)
         self.logOutButton.setText(QCoreApplication.translate("MainWindow", u"LogOut", None))
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Reload", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Search by ", None))
+        self.sessionCodeRadio.setText(QCoreApplication.translate("MainWindow", u"Session Code", None))
+        self.nickNameRadio.setText(QCoreApplication.translate("MainWindow", u"Session Nick Name", None))
+        self.activeCheck.setText(QCoreApplication.translate("MainWindow", u"Active Session", None))
+        self.searchBar.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter Session Code", None))
+#if QT_CONFIG(tooltip)
+        self.searchButton.setToolTip(QCoreApplication.translate("MainWindow", u"Search Challan", None))
+#endif // QT_CONFIG(tooltip)
+        self.searchButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
+        self.sessionDetailsBox.setTitle(QCoreApplication.translate("MainWindow", u"Session Details", None))
+        self.nickNameDisplay.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Quiz Nick Name", None))
+        self.durationDisplay.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Duration in Minutes", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Start", None))
+        self.sessionStartDisplay.setDisplayFormat(QCoreApplication.translate("MainWindow", u"dd-MM-yyyy hh:mm:ss", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"End", None))
+        self.sessionEndDisplay.setDisplayFormat(QCoreApplication.translate("MainWindow", u"dd-MM-yyyy hh:mm:ss", None))
+        self.participantsBox.setTitle(QCoreApplication.translate("MainWindow", u"Participants", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.manageQuizTab), QCoreApplication.translate("MainWindow", u"Manage Quiz", None))
         self.sessionNickName.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Quiz Nick Name", None))
         self.isTimeConstrained.setText(QCoreApplication.translate("MainWindow", u"Time Constrained", None))

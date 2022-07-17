@@ -217,10 +217,10 @@ class Ui_loginSection(QWidget):
             return
         res = self.adminLogin(username,password)
         if(res):
-            res2 = db.login(username)
-            if(res2):
-                QMessageBox.information(self,"Active Session Alert","Seems like you are already logged in on another device. Please try logging out there.")
-                return
+            # res2 = db.login(username)
+            # if(res2):
+            #     QMessageBox.information(self,"Active Session Alert","Seems like you are already logged in on another device. Please try logging out there.")
+            #     return
             self.main = MainSpace(username)
             self.exit()
             self.main.show()

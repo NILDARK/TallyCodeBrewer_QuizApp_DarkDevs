@@ -180,13 +180,58 @@ def updateParticipant(session_code,pcode,completionStatus=False,score=None):
     except Exception as err:
         print(err)
         return False
+def getAllSessions(username,active=False):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        sessions = db["sessions"]
+        curtime = datetime.datetime.now()
+        query = {"session_owner":username}
+        res = sessions.find(query)
+        ret = {}
+        for x in res:
+            if(active):
+                start = x["session_start"]
+                end = x["session_end"]
+                if(start==None or end==None):
+                    pass
+                elif(curtime>=end or curtime<start):
+                    continue
+            ret[x["session_code"]]={"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
+        return ret
+    except Exception as err:
+        print(err)
+        return None
+def getSessionInfo(session_code):
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        sessions = db["sessions"]
+        query = {"session_code":session_code}
+        res = sessions.find(query)
+        ret = {}
+        for x in res:
+            return {"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
+    except Exception as err:
+        print(err)
+        return None
 if __name__=="__main__":
     client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
     db = client.get_database('quiz')
     sessions = db["sessions"]
-    myquery = { "session_owner": "test@123"}
-    newvalues = { "$set": { "session_start": datetime.datetime(year=2022, month=7, day=15,hour=23,minute=30) ,"session_end":datetime.datetime(year=2022, month=7, day=16,hour=10,minute=30) }}
-
-    sessions.update_one(myquery, newvalues)
-    for x in sessions.find(myquery):
-        print(x)
+    curtime = datetime.datetime.now()
+    query = {"session_owner":"test@123"}
+    res = sessions.find(query)
+    # ret = {}
+    # for x in res:
+    #     if(active):
+    #         start = x["session_start"]
+    #         end = x["session_end"]
+    #         if(start==None or end==None):
+    #             pass
+    #         elif(curtime>=end or curtime<start):
+    #             continue
+    #     ret[x["session_code"]]={"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
+    # print(ret)
+    
+    
