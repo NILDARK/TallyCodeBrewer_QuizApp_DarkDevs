@@ -128,7 +128,7 @@ class Ui_loginSection(QWidget):
             self.signUpCred0.clear()
             err+="Name field must not blank.\n"
         x = name.replace(" ","")
-        elif(x.isalpha()==False):
+        if(x.isalpha()==False):
             self.signUpCred0.clear()
             err+="Name can contain alphabets and spaces only."
         usrVal = self.validateUsername(username)
