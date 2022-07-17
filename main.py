@@ -1277,6 +1277,7 @@ class Ui_MainWindow(QMainWindow):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.usernameLabel = QLabel(self.widget)
         self.usernameLabel.setObjectName(u"usernameLabel")
+        self.usernameLabel.setStyleSheet(''' font-size: 24px; ''')
         self.usernameLabel.setText(f"Welcome, {self.username}")
         self.horizontalLayout.addWidget(self.usernameLabel)
 
@@ -1865,6 +1866,10 @@ class Ui_QuizPlatform(QMainWindow):
         self.opt_2.setText(question["options"][optionsList[1]]) 
         self.opt_3.setText(question["options"][optionsList[2]]) 
         self.opt_4.setText(question["options"][optionsList[3]])
+        # self.opt_1.setStyleSheet(''' font-size: 28px; ''')
+        # self.opt_2.setStyleSheet(''' font-size: 18px; ''')
+        # self.opt_3.setStyleSheet(''' font-size: 18px; ''')
+        # self.opt_4.setStyleSheet(''' font-size: 18px; ''')
         self.curOptionBasket[0]= optionsList[0]
         self.curOptionBasket[1]= optionsList[1]
         self.curOptionBasket[2]= optionsList[2]
@@ -1885,7 +1890,9 @@ class Ui_QuizPlatform(QMainWindow):
         except:
             pass
         self.maxScoreLabel.setText(f"Max Score: {int(question['score'])}")
+        self.maxScoreLabel.setStyleSheet(''' font-size: 18px; ''')
         self.questionCountLabel.setText(f"{self.curQues+1}/{self.totalQues}")
+        self.questionCountLabel.setStyleSheet(''' font-size: 18px; ''')
     def nextQue(self):
         resp = self.optionsGroup.checkedId()
         if(resp!=-1 and resp!=4):
@@ -2040,6 +2047,8 @@ class Ui_QuizPlatform(QMainWindow):
         self.participantNameLabel = QLabel(self.widget_2)
         self.participantNameLabel.setObjectName(u"participantNameLabel")
         self.participantNameLabel.setText(f"Welcome, {self.participantName}")
+        self.participantNameLabel.setStyleSheet(''' font-size: 18px; ''') 
+        
         self.horizontalLayout_3.addWidget(self.participantNameLabel)
 
         self.horizontalSpacer = QSpacerItem(227, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -2059,6 +2068,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_2.addWidget(self.timerLabel)
         self.extraLabel = QLabel(self.timerWidget)
         self.extraLabel.setText("Remaining Time To Finish")
+        self.extraLabel.setStyleSheet(''' font-size: 18px; ''')
         self.horizontalLayout_2.addWidget(self.extraLabel)
 
         self.horizontalLayout_3.addWidget(self.timerWidget)
@@ -2081,12 +2091,14 @@ class Ui_QuizPlatform(QMainWindow):
         self.submitQuizButton.setObjectName(u"submitQuizButton")
         self.submitQuizButton.setVisible(False)
         self.submitQuizButton.clicked.connect(partial(self.submitQuiz,True))
+        self.submitQuizButton.setStyleSheet(''' font-size: 18px; ''')
         self.horizontalLayout.addWidget(self.submitQuizButton)
 
         self.instructionsIcon = QPushButton(self.widget_5)
         self.instructionsIcon.setObjectName(u"instructionsIcon")
         self.instructionsIcon.setVisible(False)
         self.instructionsIcon.clicked.connect(self.showInstructions)
+        self.instructionsIcon.setStyleSheet(''' font-size: 18px; ''')
         icon = QIcon()
         icon.addFile(u"Images/info_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         self.instructionsIcon.setIcon(icon)
@@ -2160,6 +2172,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.questionEdit = QPlainTextEdit(self.widget_14)
         self.questionEdit.setObjectName(u"questionEdit")
         self.questionEdit.setReadOnly(True)
+        self.questionEdit.setStyleSheet(''' font-size: 18px; ''')
 
         self.horizontalLayout_8.addWidget(self.questionEdit)
 
@@ -2182,6 +2195,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.resetButton = QPushButton(self.widget_15)
         self.resetButton.setObjectName(u"resetButton")
         self.resetButton.clicked.connect(self.resetSelection)
+        self.resetButton.setStyleSheet(''' font-size: 18px; ''')
         self.horizontalLayout_9.addWidget(self.resetButton)
 
 
@@ -2198,6 +2212,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.optionsGroup = QButtonGroup(self.widget_16)
         self.opt_1 = QRadioButton(self.widget_17)
         self.opt_1.setObjectName(u"opt_1")
+        self.opt_1.setStyleSheet(''' font-size: 18px; ''')
         self.optionsGroup.addButton(self.opt_1,0)
         self.horizontalLayout_10.addWidget(self.opt_1)
 
@@ -2214,6 +2229,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.opt_2 = QRadioButton(self.widget_18)
         self.opt_2.setObjectName(u"opt_2")
+        self.opt_2.setStyleSheet(''' font-size: 18px; ''')
         self.optionsGroup.addButton(self.opt_2,1)
 
         self.horizontalLayout_11.addWidget(self.opt_2)
@@ -2231,6 +2247,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
         self.opt_3 = QRadioButton(self.widget_19)
         self.opt_3.setObjectName(u"opt_3")
+        self.opt_3.setStyleSheet(''' font-size: 18px; ''')
         self.optionsGroup.addButton(self.opt_3,2)
         self.horizontalLayout_12.addWidget(self.opt_3)
 
@@ -2247,6 +2264,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
         self.opt_4 = QRadioButton(self.widget_20)
         self.opt_4.setObjectName(u"opt_4")
+        self.opt_4.setStyleSheet(''' font-size: 18px; ''')
         self.optionsGroup.addButton(self.opt_4,3)
         self.opt_5 = QRadioButton(self.widget_20)
         self.opt_5.setObjectName(u"opt_4")
@@ -2273,6 +2291,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.previousButton = QPushButton(self.widget_12)
         self.previousButton.setObjectName(u"previousButton")
+        self.previousButton.setStyleSheet(''' font-size: 18px; ''')
         self.previousButton.clicked.connect(self.prevQue)
         self.horizontalLayout_7.addWidget(self.previousButton)
 
@@ -2295,6 +2314,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.nextButton = QPushButton(self.widget_13)
         self.nextButton.setObjectName(u"nextButton")
+        self.nextButton.setStyleSheet(''' font-size: 18px; ''')
         self.nextButton.clicked.connect(self.nextQue)
 
         self.horizontalLayout_6.addWidget(self.nextButton)
