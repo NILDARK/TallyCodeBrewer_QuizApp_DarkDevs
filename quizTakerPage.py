@@ -86,7 +86,6 @@ class Ui_QuizPlatform(QMainWindow):
         if(fsub):
             self.forceFullSubmit = True
         self._left_seconds = 0
-        print(self.response)
         self.score = self.evaluateQuiz()
         self.completionStatus = True
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
