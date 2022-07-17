@@ -401,6 +401,19 @@ class Ui_MainWindow(QMainWindow):
         else:
             QMessageBox.critical(self,"Connection Error","Unable to fetch database, please check internet connection and try again.")
             return
+    def search(self):
+        txt = self.searchBar.text().strip()
+        if(self.sessionCodeRadio.isChecked()):
+            x = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d",txt)
+            if(x==None):
+                QMessageBox.critical(self,"Error","Invalid Code Format")
+                self.searchBar.clear()
+                return
+        else:
+            if(txt==""):
+                QMessageBox.critical(self,"Error","Nick Name must not blank.")
+                self.searchBar.clear()
+                return
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
