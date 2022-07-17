@@ -327,7 +327,7 @@ class Ui_loginSection(QWidget):
             if(self.isConnected()==False):
                 QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
                 return
-            res = db.addParticipant(session["session_code"],name,False,None)
+            res = db.addParticipant(session["session_code"],name,False,-1)
             if(res==None):
                 QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
                 return
