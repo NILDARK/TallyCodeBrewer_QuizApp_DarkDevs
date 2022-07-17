@@ -216,22 +216,14 @@ def getSessionInfo(session_code):
         print(err)
         return None
 if __name__=="__main__":
-    client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
-    db = client.get_database('quiz')
-    sessions = db["sessions"]
-    curtime = datetime.datetime.now()
-    query = {"session_owner":"test@123"}
-    res = sessions.find(query)
-    # ret = {}
-    # for x in res:
-    #     if(active):
-    #         start = x["session_start"]
-    #         end = x["session_end"]
-    #         if(start==None or end==None):
-    #             pass
-    #         elif(curtime>=end or curtime<start):
-    #             continue
-    #     ret[x["session_code"]]={"session_nickname":x["session_nickname"],"duration":x["duration"],"session_start":x["session_start"],"session_end":x["session_end"],"questions":x["questions"],"participants":x["participants"]}
-    # print(ret)
-    
+    try:
+        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        db = client.get_database('quiz')
+        sessions = db["sessions"]
+        curtime = datetime.datetime.now()
+        query = {"session_owner":"test@123"}
+        res = sessions.find(query)
+    except pymongo.errors.ConnectionFailure:
+        print("No internet")
+            
     
