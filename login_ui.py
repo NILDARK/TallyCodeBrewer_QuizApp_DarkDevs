@@ -20,7 +20,19 @@ from dateutil import parser
 import random,enum
 from functools import partial
 class MainSpace(QMainWindow):
+    def isConnected(self):
+        try:
+            socket.create_connection(("1.1.1.1", 53))
+            # QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            return True
+        except OSError:
+            pass
+        return False
     def closeEvent(self,event):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Unsuccessful logout. Exiting Application")
+            event.accept()
+            return
         res = db.logOut(self.usr,False)
         if(res):
             QMessageBox.information(self,"Info","Logged out Successfully.")
@@ -40,7 +52,7 @@ class Ui_loginSection(QWidget):
     def isConnected(self):
         try:
             socket.create_connection(("1.1.1.1", 53))
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            # QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return True
         except OSError:
             pass
@@ -132,16 +144,21 @@ class Ui_loginSection(QWidget):
             QMessageBox.critical(self,"Password Mismatch","Entered Password does not match with above password.")
             self.signUpCred4.clear()
             return
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
         if(db.verifyUsername(username)[0]):
             QMessageBox.critical(self,"Error","Username already exists.")
             self.loginCred1.clear()
             self.loginCred2.clear()
             return
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            return
         res = self.validateEmail(email,name)
         if(res==True):
-            if(not self.isConnected()):
+            if(self.isConnected()==False):
+                QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
                 return
             if(db.addQuizAdmin([name,username,password,email])):
                 QMessageBox.information(self,"Success",f"{name}, you are all set to create and manage Quizes. Login as Quiz Admin to get started.")
@@ -180,8 +197,6 @@ class Ui_loginSection(QWidget):
             print(ex)
             return False
     def validateEmail(self,email,name):
-        if(not self.isConnected()):
-            return
         email_aval = db.checkEmailAvaibility(email)
         if(email_aval==None):
             QMessageBox.critical(self,"Connection Error","Something went wrong. Please check internet connection and try later.")
@@ -247,8 +262,9 @@ class Ui_loginSection(QWidget):
             self.main.show()
         return
     def adminLogin(self,username,password):
-        if(not self.isConnected()):
-            return
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            return False
         res = db.verifyUsername(username)
         if(res[0]):
             if(res[1]==password):
@@ -281,7 +297,8 @@ class Ui_loginSection(QWidget):
         if(err!=""):
             QMessageBox.critical(self,"Error",err)
             return
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
         res = db.verifySessionCode(quizcode)
         if(res[0]==None):
@@ -306,7 +323,8 @@ class Ui_loginSection(QWidget):
                 elif((curtime)>(end-datetime.timedelta(minutes = int(session["duration"])))):
                     QMessageBox.information(self,"Info","You can not attempt the quiz as you cannot complete the quiz by the session end.")
                     return
-            if(not self.isConnected()):
+            if(self.isConnected()==False):
+                QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
                 return
             res = db.addParticipant(session["session_code"],name,False,None)
             if(res==None):
@@ -755,7 +773,7 @@ class Ui_MainWindow(QMainWindow):
     def isConnected(self):
         try:
             socket.create_connection(("1.1.1.1", 53))
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            # QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return True
         except OSError:
             pass
@@ -1087,7 +1105,8 @@ class Ui_MainWindow(QMainWindow):
             res = alert.exec_()
             if(res==4194304):
                 return
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
         res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
         if(res[0]):
@@ -1119,7 +1138,8 @@ class Ui_MainWindow(QMainWindow):
         self.searchBar.setPlaceholderText("Enter Quiz Name")
         
     def addAllSessionsToList(self):
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
         self.allSessionDetails = db.getAllSessions(self.username)
         self.allSessionDetails = {k: v for k, v in sorted(self.allSessionDetails.items(), key=lambda item: item[1]["session_start"],reverse=True)}
@@ -1179,7 +1199,8 @@ class Ui_MainWindow(QMainWindow):
             self.participantsList.setItem(row, 2, item3)
             row+=1
     def reload(self):
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
         res = db.getAllSessions(self.username)
         if(res!=None):
@@ -1346,8 +1367,9 @@ class Ui_MainWindow(QMainWindow):
         self.activeCheck.setObjectName(u"activeCheck")
 
         self.horizontalLayout_11.addWidget(self.activeCheck)
-        if(not self.isConnected()):
-            return
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            self.mwin.close()
         self.sessions = db.getAllSessions(self.username,active=False)
 
         self.verticalLayout_5.addWidget(self.widget_16)
@@ -1812,7 +1834,7 @@ class Ui_QuizPlatform(QMainWindow):
     def isConnected(self):
         try:
             socket.create_connection(("1.1.1.1", 53))
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            # QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return True
         except OSError:
             pass
@@ -1886,7 +1908,9 @@ class Ui_QuizPlatform(QMainWindow):
         self._left_seconds = 0
         self.score = self.evaluateQuiz()
         self.completionStatus = True
-        if(not self.isConnected()):
+        if(self.isConnected()==False):
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Unable to submit responses. Exiting Application")
+            sys.exit(0)
             return
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
         if(res):
