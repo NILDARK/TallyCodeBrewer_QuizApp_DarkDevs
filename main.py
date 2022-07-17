@@ -1440,7 +1440,7 @@ class Ui_MainWindow(QMainWindow):
         item = QTableWidgetItem()
         item.setTextAlignment(Qt.AlignCenter)
         item.setBackground(QColor(135, 155, 161))
-        item.setText("Quiz Duration")
+        item.setText("Quiz Duration (in Minutes)")
         self.sessionList.setHorizontalHeaderItem(2, item)
         self.sessionList.horizontalHeader().setDefaultSectionSize(600)
 
