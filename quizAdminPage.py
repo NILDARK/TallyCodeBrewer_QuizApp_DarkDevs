@@ -16,12 +16,6 @@ from dateutil import parser
 import db
 
 class Ui_MainWindow(QMainWindow):
-    def closeEvent(self,event):
-        print("HI")
-        res = db.logOut(self.username,False)
-        if(res):
-            QMessageBox.information(self,"Info","Logged out Successfully.")
-        event.accept()
     def __init__(self,username):
         QMainWindow.__init__(self)
         self.username = username
@@ -331,9 +325,6 @@ class Ui_MainWindow(QMainWindow):
         else:
             print("failed")
     def logOut(self):
-        res = db.logOut(self.username,False)
-        if(res):
-            QMessageBox.information(self,"Info","Logged out Successfully.")
         self.mwin.close()
     def resetAll(self):
         self.reset()
@@ -364,6 +355,47 @@ class Ui_MainWindow(QMainWindow):
             self.sessionList.setItem(row, 1, item2)
             self.sessionList.setItem(row, 2, item3)
             row+=1
+    def showSessionDetails(self):
+        self.sessionDisplayWidget.setVisible(True)
+        cur = self.sessionList.currentRow()
+        session_code = self.sessionList.item(cur,0).text().strip()
+        duration = self.sessionList.item(cur,2).text().strip()
+        nickName = self.sessionList.item(cur,1).text().strip()
+        res = self.allSessionDetails[session_code]
+        start = res["session_start"]
+        end = res["session_end"]
+        participants = res["participants"]
+        self.nickNameDisplay.setText(nickName)
+        self.durationDisplay.setText(duration)
+        if(start==None or end==None):
+            self.timeConstraintDisplay.setVisible(False)
+        else:
+            self.timeConstraintDisplay.setVisible(True)
+            self.sessionStartDisplay.setDateTime(start)
+            self.sessionEndDisplay.setDateTime(end)
+        self.participantsList.clearContents()
+        self.participantsList.setRowCount(0)
+        self.participantsList.setRowCount(len(participants))
+        row = 0
+        for participant in participants.values():
+            item1 = QTableWidgetItem(participant["participantName"])
+            item1.setTextAlignment(Qt.AlignCenter)
+            if(participant["completionStatus"]):
+                x = "Successfully Attempted"
+                score = str(participant["score"])
+            else:
+                x = "Not Attempted/Unsuccessfull Attempt"
+                score = "Not Available"
+            item2 = QTableWidgetItem(x)
+            item2.setTextAlignment(Qt.AlignCenter)
+            item3 = QTableWidgetItem(score)
+            item3.setTextAlignment(Qt.AlignCenter)
+            self.participantsList.setItem(row, 0, item1)
+            self.participantsList.setItem(row, 1, item2)
+            self.participantsList.setItem(row, 2, item3)
+            row+=1
+        
+        
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
@@ -510,14 +542,14 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionList = QTableWidget(self.widget_11)
         self.sessionList.setObjectName(u"sessionList")
-        self.sessionList.setColumnCount(3)
-        self.sessionList.setRowCount(0)
         self.sessionList.setFrameShape(QFrame.NoFrame)
         self.sessionList.setFrameShadow(QFrame.Plain)
+        self.sessionList.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.sessionList.verticalHeader().setVisible(False)
-        self.sessionList.setEditTriggers(
-            QAbstractItemView.NoEditTriggers)
+        self.sessionList.setColumnCount(3)
+        self.sessionList.setRowCount(0)
         self.sessionList.setDragDropOverwriteMode(False)
+        self.sessionList.itemClicked.connect(self.showSessionDetails)
         item = QTableWidgetItem()
         item.setTextAlignment(Qt.AlignCenter)
         item.setBackground(QColor(135, 155, 161))
@@ -542,6 +574,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.sessionDisplayWidget = QWidget(self.widget_14)
         self.sessionDisplayWidget.setObjectName(u"sessionDisplayWidget")
+        self.sessionDisplayWidget.setVisible(False)
         self.verticalLayout_6 = QVBoxLayout(self.sessionDisplayWidget)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.sessionDetailsBox = QGroupBox(self.sessionDisplayWidget)
@@ -624,12 +657,30 @@ class Ui_MainWindow(QMainWindow):
         self.participantsList.setFrameShape(QFrame.NoFrame)
         self.participantsList.setFrameShadow(QFrame.Plain)
         self.participantsList.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
+        self.participantsList.verticalHeader().setVisible(False)
+        self.participantsList.setColumnCount(3)
+        self.participantsList.setRowCount(0)
+        self.participantsList.setDragDropOverwriteMode(False)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Participant Name")
+        self.participantsList.setHorizontalHeaderItem(0, item)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Completion Status")
+        self.participantsList.setHorizontalHeaderItem(1, item)
+        item = QTableWidgetItem()
+        item.setTextAlignment(Qt.AlignCenter)
+        item.setBackground(QColor(135, 155, 161))
+        item.setText("Score")
+        self.participantsList.setHorizontalHeaderItem(2, item)
+        self.participantsList.horizontalHeader().setDefaultSectionSize(600)
         self.horizontalLayout_17.addWidget(self.participantsList)
 
 
         self.verticalLayout_6.addWidget(self.participantsBox)
-
 
         self.horizontalLayout_18.addWidget(self.sessionDisplayWidget)
 

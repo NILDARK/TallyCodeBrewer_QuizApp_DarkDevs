@@ -14,6 +14,7 @@ from PySide2.QtWidgets import *
 import enum
 import random
 import db
+import datetime
 from functools import partial
 class TimerStatus(enum.Enum):
     init, counting, paused = 1, 2, 3
@@ -162,6 +163,11 @@ class Ui_QuizPlatform(QMainWindow):
         else:
             self.startQuizButton.setEnabled(False)
     def startQuiz(self):
+        curtime = datetime.datetime.now()
+        if((curtime)>(self.session["session_end"]-datetime.timedelta(minutes = int(self.session["duration"])))):
+            QMessageBox.information(self,"Info","You can not attempt the quiz as you cannot complete the quiz by the session end.")
+            self.exit()
+            return
         self.timerWidget.setVisible(True)
         self.quizWidget.setVisible(True)
         self.instructionsWidget.setVisible(False)
