@@ -2057,7 +2057,7 @@ class Ui_QuizPlatform(QMainWindow):
 
         self.horizontalLayout_2.addWidget(self.timerLabel)
         self.extraLabel = QLabel(self.timerWidget)
-        self.extraLabel.setText("remaining time for quiz")
+        self.extraLabel.setText("Remaining Time To Finish")
         self.horizontalLayout_2.addWidget(self.extraLabel)
 
         self.horizontalLayout_3.addWidget(self.timerWidget)
