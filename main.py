@@ -2101,6 +2101,8 @@ class Ui_QuizPlatform(QMainWindow):
         self.instructionsIcon.setVisible(False)
         self.instructionsIcon.clicked.connect(self.showInstructions)
         self.instructionsIcon.setStyleSheet(''' font-size: 18px; ''')
+        self.instructionsIcon.setFixedSize(31, 31)
+        self.instructionsIcon.setIconSize(QSize(31, 31))
         icon = QIcon()
         icon.addFile(u"Images/info_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         self.instructionsIcon.setIcon(icon)
