@@ -19,9 +19,15 @@ import db
 from quizAdminPage import Ui_MainWindow
 from quizTakerPage import Ui_QuizPlatform
 class MainSpace(QMainWindow):
+    def closeEvent(self,event):
+        res = db.logOut(self.usr,False)
+        if(res):
+            QMessageBox.information(self,"Info","Logged out Successfully.")
+        event.accept()
     def __init__(self, username):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow(username)
+        self.usr = username
         self.ui.setupUi(self)
 class MainSpace2(QMainWindow):
     def __init__(self, name,session,pcode):

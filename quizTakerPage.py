@@ -14,6 +14,7 @@ from PySide2.QtWidgets import *
 import enum
 import random
 import db
+import datetime
 from functools import partial
 class TimerStatus(enum.Enum):
     init, counting, paused = 1, 2, 3
@@ -78,7 +79,7 @@ class Ui_QuizPlatform(QMainWindow):
             self.response[self.queDisplayArr[self.curQues]]=self.curOptionBasket[resp]
             self.opt_5.setChecked(True)
         self.curQues = self.curQues-1
-        if(self.curQues-1<0):
+        if(self.curQues<0):
             self.curQues=self.totalQues-1
         self.showQuestion()
     def submitQuiz(self,fsub=False):
@@ -89,7 +90,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.completionStatus = True
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
         if(res):
-            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. And you attempted {len(self.response)} questions out of {self.totalQues}.")
+            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \n You attempted {len(self.response)} questions out of {self.totalQues}.")
             self.exit()
             return
         else:
@@ -146,7 +147,7 @@ class Ui_QuizPlatform(QMainWindow):
         total_seconds = total_seconds - (hours * 3600)
         minutes = total_seconds // 60
         seconds = total_seconds - (minutes * 60)
-        if(total_seconds<0.05*self.session["duration"]*60):
+        if(total_seconds<0.1*self.session["duration"]*60):
             self.timerLabel.setStyleSheet("color:red;")
         else:
             self.timerLabel.setStyleSheet("color:#000080;")
@@ -162,6 +163,11 @@ class Ui_QuizPlatform(QMainWindow):
         else:
             self.startQuizButton.setEnabled(False)
     def startQuiz(self):
+        curtime = datetime.datetime.now()
+        if(self.session["session_end"]!=None and (curtime)>(self.session["session_end"]-datetime.timedelta(minutes = int(self.session["duration"])))):
+            QMessageBox.information(self,"Info","You can not attempt the quiz as you cannot complete the quiz by the session end.")
+            self.exit()
+            return
         self.timerWidget.setVisible(True)
         self.quizWidget.setVisible(True)
         self.instructionsWidget.setVisible(False)
