@@ -86,6 +86,7 @@ class Ui_QuizPlatform(QMainWindow):
         if(fsub):
             self.forceFullSubmit = True
         self._left_seconds = 0
+        print(self.response)
         self.score = self.evaluateQuiz()
         self.completionStatus = True
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
@@ -110,10 +111,8 @@ class Ui_QuizPlatform(QMainWindow):
             cor = question["answer"][0]
             if(resp==cor):
                 score+=int(question["score"])
+            if(resp!=-1):
                 attempted+=1
-            elif(type(resp)==str):
-                attempted+=1
-            
         return [score,totalScore,attempted]
     def resetSelection(self):
         resp = self.optionsGroup.checkedId()
