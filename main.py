@@ -19,6 +19,7 @@ import db
 from dateutil import parser
 import random,enum
 from functools import partial
+from creds import *
 class MainSpace(QMainWindow):
     def isConnected(self):
         try:
@@ -186,10 +187,10 @@ class Ui_loginSection(QWidget):
         try: 
             smtp = smtplib.SMTP('smtp.gmail.com', 587) 
             smtp.starttls() 
-            smtp.login("nildark2020@gmail.com","npewknmqghmnkett")
+            smtp.login(sndemail,emailpass)
             message = f"Hello {name},\n    Your OTP for email verification is "+OTP+"\nFrom Team DarkDevs" 
             message = 'Subject: {}\n\n{}'.format("Verification Code", message)
-            smtp.sendmail("nildark2020@gmail.com", to_email,message) 
+            smtp.sendmail("sndemail", to_email,message) 
             smtp.quit() 
             print ("Email sent successfully!") 
             return True

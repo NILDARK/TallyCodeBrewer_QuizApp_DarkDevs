@@ -3,9 +3,10 @@ import datetime
 import bson
 import rstr
 import re
+from creds import dbname,dbpass
 def addQuizAdmin(details):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["quizAdmins"]
         record = {"name":details[0],"username":details[1],"password":details[2],"email":details[3],"isActive":False}
@@ -16,7 +17,7 @@ def addQuizAdmin(details):
         return False
 def login(username):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["quizAdmins"]
         query = {"username":username}
@@ -33,7 +34,7 @@ def login(username):
         return False
 def logOut(username,status = False):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["quizAdmins"]
         query = {"username":username}
@@ -45,7 +46,7 @@ def logOut(username,status = False):
         return False
 def verifyUsername(username):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["quizAdmins"]
         query = {"username":username}
@@ -59,7 +60,7 @@ def verifyUsername(username):
         return [False,None]
 def checkEmailAvaibility(email):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["quizAdmins"]
         query = {"email":email}
@@ -73,7 +74,7 @@ def checkEmailAvaibility(email):
         return None
 def checkSessionCode(a):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["sessions"]
         query = {"session_code":a}
@@ -88,7 +89,7 @@ def checkSessionCode(a):
         return True
 def publishQuiz(questions,nickname,duration,username,start=None,end=None):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["sessions"]
         a = rstr.xeger(r'[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d')
@@ -134,7 +135,7 @@ def publishQuiz(questions,nickname,duration,username,start=None,end=None):
         return [False,None]
 def verifySessionCode(code):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["sessions"]
         query = {"session_code":code}
@@ -148,7 +149,7 @@ def verifySessionCode(code):
         return [None,None]
 def addParticipant(session_code,participantName,completionStatus=False,score=None):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["sessions"]
         query = {"session_code":session_code}
@@ -165,7 +166,7 @@ def addParticipant(session_code,participantName,completionStatus=False,score=Non
         return None
 def updateParticipant(session_code,pcode,completionStatus=False,score=None):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         col = db["sessions"]
         query = {"session_code":session_code}
@@ -182,7 +183,7 @@ def updateParticipant(session_code,pcode,completionStatus=False,score=None):
         return False
 def getAllSessions(username,active=False):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         sessions = db["sessions"]
         curtime = datetime.datetime.now()
@@ -204,7 +205,7 @@ def getAllSessions(username,active=False):
         return None
 def getSessionInfo(session_code):
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         sessions = db["sessions"]
         query = {"session_code":session_code}
@@ -217,7 +218,7 @@ def getSessionInfo(session_code):
         return None
 if __name__=="__main__":
     try:
-        client = pymongo.MongoClient("mongodb://quizDB:quizDB@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
+        client = pymongo.MongoClient(f"mongodb://{dbname}:{dbpass}@cluster0-shard-00-00.jk81v.mongodb.net:27017,cluster0-shard-00-01.jk81v.mongodb.net:27017,cluster0-shard-00-02.jk81v.mongodb.net:27017/?ssl=true&replicaSet=atlas-rms0md-shard-0&authSource=admin&retryWrites=true&w=majority")
         db = client.get_database('quiz')
         sessions = db["sessions"]
         curtime = datetime.datetime.now()
