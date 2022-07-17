@@ -394,8 +394,13 @@ class Ui_MainWindow(QMainWindow):
             self.participantsList.setItem(row, 1, item2)
             self.participantsList.setItem(row, 2, item3)
             row+=1
-        
-        
+    def reload(self):
+        res = db.getAllSessions(self.username)
+        if(res!=None):
+            self.sessions = res
+        else:
+            QMessageBox.critical(self,"Connection Error","Unable to fetch database, please check internet connection and try again.")
+            return
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
