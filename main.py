@@ -2297,6 +2297,9 @@ class Ui_QuizPlatform(QMainWindow):
         self.previousButton.setObjectName(u"previousButton")
         self.previousButton.setStyleSheet(''' font-size: 18px; ''')
         self.previousButton.clicked.connect(self.prevQue)
+        icon34 = QIcon()
+        icon34.addFile(u"Images/previous.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.previousButton.setIcon(icon34)
         self.horizontalLayout_7.addWidget(self.previousButton)
 
         self.horizontalSpacer_4 = QSpacerItem(61, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -2319,6 +2322,9 @@ class Ui_QuizPlatform(QMainWindow):
         self.nextButton = QPushButton(self.widget_13)
         self.nextButton.setObjectName(u"nextButton")
         self.nextButton.setStyleSheet(''' font-size: 18px; ''')
+        icon33 = QIcon()
+        icon33.addFile(u"Images/next.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.nextButton.setIcon(icon33)
         self.nextButton.clicked.connect(self.nextQue)
 
         self.horizontalLayout_6.addWidget(self.nextButton)
