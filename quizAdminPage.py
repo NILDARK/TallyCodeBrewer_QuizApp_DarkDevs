@@ -201,6 +201,8 @@ class Ui_MainWindow(QMainWindow):
             answer.append(resp)
         if(score==""):
             score = "1"
+        elif(score.isnumeric()==False):
+            err+="Score must be a number > 0.\n"
         if(que==""):
             err+="Question must not be blank."
         if(err!=""):
