@@ -13,8 +13,8 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from functools import partial
 from dateutil import parser
-import db
-
+import db,re
+import datetime
 class Ui_MainWindow(QMainWindow):
     def __init__(self,username):
         QMainWindow.__init__(self)
@@ -58,8 +58,11 @@ class Ui_MainWindow(QMainWindow):
         widget_5.setObjectName(f"widget_5#{self.qid}")
         horizontalLayout_3 = QHBoxLayout(widget_5)
         horizontalLayout_3.setObjectName(f"horizontalLayout_3#{self.qid}")
+        optionGroup = QButtongroup(widget_4)
+        optionGroup.setObjectName(f"optionGroup#{self.qid}")
         opt_1 = QRadioButton(widget_5)
         opt_1.setObjectName(f"opt_1#{self.qid}")
+        optionGroup.addButton(opt_1,0)
         horizontalLayout_3.addWidget(opt_1)
         horizontalSpacer_2 = QSpacerItem(191, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_3.addItem(horizontalSpacer_2)
@@ -74,6 +77,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_4.setObjectName(f"horizontalLayout_4#{self.qid}")
         opt_2 = QRadioButton(widget_6)
         opt_2.setObjectName(f"opt_2#{self.qid}")
+        optionGroup.addButton(opt_2,1)
         horizontalLayout_4.addWidget(opt_2)
         horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_4.addItem(horizontalSpacer_3)
@@ -88,6 +92,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_5.setObjectName(f"horizontalLayout_5#{self.qid}")
         opt_3 = QRadioButton(widget_7)
         opt_3.setObjectName(f"opt_3#{self.qid}")
+        optionGroup.addButton(opt_3,2)
         horizontalLayout_5.addWidget(opt_3)
         horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_5.addItem(horizontalSpacer_4)
@@ -102,6 +107,7 @@ class Ui_MainWindow(QMainWindow):
         horizontalLayout_6.setObjectName(f"horizontalLayout_6#{self.qid}")
         opt_4 = QRadioButton(widget_8)
         opt_4.setObjectName(f"opt_4#{self.qid}")
+        optionGroup.addButton(opt_4,3)
         horizontalLayout_6.addWidget(opt_4)
         horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         horizontalLayout_6.addItem(horizontalSpacer_5)
@@ -164,26 +170,30 @@ class Ui_MainWindow(QMainWindow):
     def add(self,objname):
         x = objname.find('#')
         id = int(objname[x+1:])
+        err = ""
         queEdit = self.scrollAreaWidgetContents.findChild(QPlainTextEdit,f"questionEdit#{id}")
         scoreEdit = self.scrollAreaWidgetContents.findChild(QLineEdit,f"scoreEdit#{id}")
-        que = queEdit.toPlainText()
+        que = queEdit.toPlainText().strip()
         score = scoreEdit.text().strip()
         opt1 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_1#{id}")
         opt2 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_2#{id}")
         opt3 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_3#{id}")
         opt4 = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_4#{id}")
         options = {0:opt1.text().strip(),1:opt2.text().strip(),2:opt3.text().strip(),3:opt4.text().strip()}
+        optionGroup = self.scrollAreaWidgetContents.findChild(QButtonGroup,f"optionGroup#{id}")
         answer = []
-        if(opt1.isChecked()):
-            answer.append(0)
-        if(opt2.isChecked()):
-            answer.append(1)
-        if(opt3.isChecked()):
-            answer.append(2)
-        if(opt4.isChecked()):
-            answer.append(3)
+        resp = optionGroup.checkedId()
+        if(resp==-1):
+            err+="Must select correct option.\n"
+        else:
+            answer.append(resp)
         if(score==""):
             score = "1"
+        if(que==""):
+            err+="Question must not be blank."
+        if(err!=""):
+            QMessageBox.critical(self,"Error",err)
+            return
         self.questions[id] = {"question":que,"options":options,"score":int(score),"answer":answer}
         wid_2 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_2#{id}")
         wid_3 = self.scrollAreaWidgetContents.findChild(QWidget,f"widget_3#{id}")
@@ -297,8 +307,8 @@ class Ui_MainWindow(QMainWindow):
             end = parser.parse(end)
             print(start,end)
         else:
-            start=None
-            end = None
+            start=datetime.datetime.now()
+            end = datetime.datetime(year=2100,day=1,month=1,hour=0,minute=0,second=0)
         if(len(self.questions)==0):
             err+="You have not added questions or may not have valid inputs. Try Adding or editing added questions.\n"
         if(err!=""):
@@ -320,10 +330,13 @@ class Ui_MainWindow(QMainWindow):
         
         res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
         if(res[0]):
-            print("Published Successfully",res[1])
+            self.reload()
+            QMessageBox.information(self,"Success",f"Quiz is Live Now. You may share the common code provided below:\n {res[1]}")
             self.resetAll()
+            return
         else:
-            print("failed")
+            QMessageBox.information(self,"Failure",f"Unable to publish quiz. Try again later.")
+            return
     def logOut(self):
         self.mwin.close()
     def resetAll(self):
@@ -333,13 +346,18 @@ class Ui_MainWindow(QMainWindow):
         self.isTimeConstrained.setChecked(False)
     def sessionCodeRadioToggled(self):
         self.searchBar.clear()
+        self.activeCheck.setEnabled(False)
+        self.activeCheck.setChecked(False)
         self.searchBar.setPlaceholderText("Enter Quiz Code")
 
     def nickNameRadioToggled(self):
         self.searchBar.clear()
+        self.activeCheck.setEnabled(True)
         self.searchBar.setPlaceholderText("Enter Quiz Name")
+        
     def addAllSessionsToList(self):
         self.allSessionDetails = db.getAllSessions(self.username)
+        self.allSessionDetails = {k: v for k, v in sorted(self.allSessionDetails.items(), key=lambda item: item[1]["session_start"],reverse=True)}
         self.sessionList.clearContents()
         self.sessionList.setRowCount(0)
         self.sessionList.setRowCount(len(self.allSessionDetails))
@@ -398,6 +416,12 @@ class Ui_MainWindow(QMainWindow):
         res = db.getAllSessions(self.username)
         if(res!=None):
             self.sessions = res
+            self.addAllSessionsToList()
+            self.searchBar.clear()
+            self.activeCheck.setEnabled(False)
+            self.activeCheck.setChecked(False)
+            self.sessionCodeRadio.setChecked(True)
+            self.sessionDisplayWidget.setVisible(False)
         else:
             QMessageBox.critical(self,"Connection Error","Unable to fetch database, please check internet connection and try again.")
             return
@@ -409,11 +433,52 @@ class Ui_MainWindow(QMainWindow):
                 QMessageBox.critical(self,"Error","Invalid Code Format")
                 self.searchBar.clear()
                 return
+            self.addSessionsToList(session_code=txt)
         else:
             if(txt==""):
-                QMessageBox.critical(self,"Error","Nick Name must not blank.")
                 self.searchBar.clear()
+                self.addAllSessionsToList()
                 return
+            self.addSessionsToList(nick_name=txt,active=self.activeCheck.isChecked())
+    def getMatch(self, txt, dic,active=False):
+        txt = txt.strip()
+        txt = txt.upper()
+        res = {}
+        l = len(txt)
+        for k,v in dic.items():
+            word = v["session_nickname"]
+            start = v["session_start"]
+            end = v["session_end"]
+            isactive = False
+            if(active==False):
+                isactive = True
+            curtime = datetime.datetime.now()
+            if(curtime<end):
+                isactive = True
+            if(txt == (word.upper())[:l] and isactive):
+                res[k]=v
+        res = {k: v for k, v in sorted(res.items(), key=lambda item: item[1]["session_start"],reverse=True)}
+        return res
+    def addSessionsToList(self,session_code=None,nick_name=None,active=False):
+        if(session_code!=None):
+            self.sessionDetails ={session_code:self.sessions[session_code]}
+        else:
+            self.sessionDetails = self.getMatch(nick_name,self.sessions,active)
+        self.sessionList.clearContents()
+        self.sessionList.setRowCount(0)
+        self.sessionList.setRowCount(len(self.sessionDetails))
+        row = 0
+        for sessioncode,session in self.sessionDetails.items():
+            item1 = QTableWidgetItem(sessioncode)
+            item1.setTextAlignment(Qt.AlignCenter)
+            item2 = QTableWidgetItem(session["session_nickname"])
+            item2.setTextAlignment(Qt.AlignCenter)
+            item3 = QTableWidgetItem(str(session["duration"]))
+            item3.setTextAlignment(Qt.AlignCenter)
+            self.sessionList.setItem(row, 0, item1)
+            self.sessionList.setItem(row, 1, item2)
+            self.sessionList.setItem(row, 2, item3)
+            row+=1
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
@@ -471,7 +536,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.pushButton = QPushButton(self.widget_13)
         self.pushButton.setObjectName(u"pushButton")
-
+        self.pushButton.clicked.connect(self.reload)
         self.horizontalLayout_10.addWidget(self.pushButton)
 
 
@@ -537,12 +602,12 @@ class Ui_MainWindow(QMainWindow):
         self.horizontalLayout_14.setObjectName(u"horizontalLayout_14")
         self.searchButton = QPushButton(self.widget_19)
         self.searchButton.setObjectName(u"searchButton")
-        self.searchButton.setEnabled(False)
+        self.searchButton.setEnabled(True)
         self.searchButton.setCursor(QCursor(Qt.PointingHandCursor))
         icon1 = QIcon()
         icon1.addFile(u"Images/search.png", QSize(), QIcon.Normal, QIcon.Off)
         self.searchButton.setIcon(icon1)
-
+        self.searchButton.clicked.connect(self.search)
         self.horizontalLayout_14.addWidget(self.searchButton)
 
         self.horizontalSpacer_8 = QSpacerItem(214, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -557,6 +622,7 @@ class Ui_MainWindow(QMainWindow):
 
         # self.sessionList = QListWidget(self.widget_11)
         # self.sessionList.setObjectName(u"sessionList")
+        self.activeCheck.setEnabled(False)
 
         self.sessionList = QTableWidget(self.widget_11)
         self.sessionList.setObjectName(u"sessionList")
