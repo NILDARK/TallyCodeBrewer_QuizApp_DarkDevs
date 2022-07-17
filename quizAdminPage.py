@@ -58,7 +58,7 @@ class Ui_MainWindow(QMainWindow):
         widget_5.setObjectName(f"widget_5#{self.qid}")
         horizontalLayout_3 = QHBoxLayout(widget_5)
         horizontalLayout_3.setObjectName(f"horizontalLayout_3#{self.qid}")
-        optionGroup = QButtongroup(widget_4)
+        optionGroup = QButtonGroup(widget_4)
         optionGroup.setObjectName(f"optionGroup#{self.qid}")
         opt_1 = QRadioButton(widget_5)
         opt_1.setObjectName(f"opt_1#{self.qid}")
@@ -306,6 +306,8 @@ class Ui_MainWindow(QMainWindow):
             duration = 10
         elif(duration.isnumeric()==False or int(duration)==0):
             err+="Duration must be a positive number greater than 0.\n"
+        elif(int(duration)>359940):
+            err+="Duration must be less than or equal to 359940 minutes, i.e. 99:59:00 hours.\n"
         else:
             duration = int(duration)
         if(self.isTimeConstrained.isChecked()):
