@@ -227,7 +227,9 @@ class Ui_QuizPlatform(QMainWindow):
         self.timerLabel.setFont(QFont("Arial",38))
 
         self.horizontalLayout_2.addWidget(self.timerLabel)
-
+        self.extraLabel = QLabel(self.timerWidget)
+        self.extraLabel.setText("remaining time for quiz")
+        self.horizontalLayout_2.addWidget(self.extraLabel)
 
         self.horizontalLayout_3.addWidget(self.timerWidget)
 
