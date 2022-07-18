@@ -20,6 +20,23 @@ from dateutil import parser
 import random,enum
 from functools import partial
 from creds import *
+import json
+
+
+def lateUpdateParticipant():
+    try:
+        with open('response.json', 'r') as openfile:
+            json_object = json.load(openfile)
+        if(json_object=={}):
+            return
+    except:
+        return
+    res = db.updateParticipant(json_object["session_code"],json_object["pcode"],json_object["completionStatus"],json_object["score"])
+    if(res):
+        json_object = json.dumps({}, indent=4)
+        with open("response.json", "w") as outfile:
+            outfile.write(json_object)
+        return
 class MainSpace(QMainWindow):
     def isConnected(self):
         try:
@@ -49,7 +66,9 @@ class MainSpace2(QMainWindow):
         self.ui = Ui_QuizPlatform(name,session,pcode)
         self.ui.setupUi(self)
 class Ui_loginSection(QWidget):
-
+    def __init__(self):
+        QWidget.__init__(self)
+        lateUpdateParticipant()
     def isConnected(self):
         try:
             socket.create_connection(("1.1.1.1", 53))
@@ -152,6 +171,7 @@ class Ui_loginSection(QWidget):
         if(self.isConnected()==False):
             QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
+        lateUpdateParticipant()
         if(db.verifyUsername(username)[0]):
             QMessageBox.critical(self,"Error","Username already exists.")
             self.loginCred1.clear()
@@ -196,10 +216,10 @@ class Ui_loginSection(QWidget):
             message = 'Subject: {}\n\n{}'.format("Verification Code", message)
             smtp.sendmail("sndemail", to_email,message) 
             smtp.quit() 
-            print ("Email sent successfully!") 
+            # print ("Email sent successfully!") 
             return True
         except Exception as ex: 
-            print(ex)
+            # print(ex)
             return False
     def validateEmail(self,email,name):
         email_aval = db.checkEmailAvaibility(email)
@@ -211,7 +231,7 @@ class Ui_loginSection(QWidget):
             self.signUpCred2.clear()
             return None
         sent_vercode = rstr.xeger(r'[0-9]{6}')
-        print(sent_vercode)
+        # print(sent_vercode)
         if(self.sendEmail(email,sent_vercode,name)):
             recv_vercode, done = QInputDialog.getText(self, 'Email Verification', f'Enter Verification Code sent to your email: {email}')
             if(done):
@@ -270,6 +290,7 @@ class Ui_loginSection(QWidget):
         if(self.isConnected()==False):
             QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return False
+        lateUpdateParticipant()
         res = db.verifyUsername(username)
         if(res[0]):
             if(res[1]==password):
@@ -305,6 +326,7 @@ class Ui_loginSection(QWidget):
         if(self.isConnected()==False):
             QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
             return
+        lateUpdateParticipant()
         res = db.verifySessionCode(quizcode)
         if(res[0]==None):
             QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
@@ -318,7 +340,7 @@ class Ui_loginSection(QWidget):
             end = session["session_end"]
             if(start!=None):
                 curtime = datetime.datetime.now()
-                print(curtime,end,curtime>end)
+                # print(curtime,end,curtime>end)
                 if(curtime<start):
                     QMessageBox.information(self,"Info","Quiz session is not started yet. You may attempt from "+str(start)+" to "+str(end-datetime.timedelta(minutes = int(session["duration"]))))
                     return
@@ -331,6 +353,7 @@ class Ui_loginSection(QWidget):
             if(self.isConnected()==False):
                 QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
                 return
+            lateUpdateParticipant()
             res = db.addParticipant(session["session_code"],name,False,-1)
             if(res==None):
                 QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
@@ -1038,6 +1061,9 @@ class Ui_MainWindow(QMainWindow):
         obj = self.scrollAreaWidgetContents.findChild(QRadioButton,f"opt_{id1}")
         opt, done = QInputDialog.getText(self, 'Edit Option', 'Enter Option Text')
         if(done and opt.strip()!=""):
+            if(len(opt)>100):
+                QMessageBox.critical(self,"Error","Option contents cannot have more than 100 characters.")
+                return
             obj.setText(opt)
         return
         
@@ -1081,7 +1107,7 @@ class Ui_MainWindow(QMainWindow):
             end = self.sessionEnd.dateTime().toString()
             start = parser.parse(start)
             end = parser.parse(end)
-            print(start,end)
+            # print(start,end)
         else:
             start=datetime.datetime.now()
             end = datetime.datetime(year=2100,day=1,month=1,hour=0,minute=0,second=0)
@@ -1916,6 +1942,13 @@ class Ui_QuizPlatform(QMainWindow):
         if(self.curQues<0):
             self.curQues=self.totalQues-1
         self.showQuestion()
+    def addToJson(self,session_code,pcode,completionStatus=False,score=-1):
+        if(score==None):
+            score = -1
+        response = {"session_code":session_code,"pcode":pcode,"completionStatus":completionStatus,"score":score}
+        json_object = json.dumps(response, indent=4)
+        with open("response.json", "w") as outfile:
+            outfile.write(json_object)
     def submitQuiz(self,fsub=False):
         if(fsub):
             self.forceFullSubmit = True
@@ -1923,12 +1956,13 @@ class Ui_QuizPlatform(QMainWindow):
         self.score = self.evaluateQuiz()
         self.completionStatus = True
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Unable to submit responses. Exiting Application")
+            QMessageBox.information(self,"Submit Status",f"Hey {self.participantName}, you have scored {self.score[0]} out of {self.score[1]}.\nYou have attempted {self.score[2]} question(s) out of {self.totalQues}.\nWe are unable to publish your score right now since you are not connected to the internet.\nPlease restart the application after connecting to the internet and we will try to submit your responses to the quiz admin.")
+            self.addToJson(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
             sys.exit(0)
             return
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
         if(res):
-            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \n You attempted {self.score[2]} questions out of {self.totalQues}.")
+            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \nYou have attempted {self.score[2]} question(s) out of {self.totalQues}.")
             self.exit()
             return
         else:
