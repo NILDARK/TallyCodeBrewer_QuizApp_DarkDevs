@@ -31,12 +31,12 @@ class MainSpace(QMainWindow):
         return False
     def closeEvent(self,event):
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Unsuccessful logout. Exiting Application")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Unable to logout. Exiting Application")
             event.accept()
             return
         res = db.logOut(self.usr,False)
         if(res):
-            QMessageBox.information(self,"Info","Logged out Successfully.")
+            QMessageBox.information(self,"Info","Logged out successfully.")
         event.accept()
     def __init__(self, username):
         QMainWindow.__init__(self)
@@ -105,9 +105,9 @@ class Ui_loginSection(QWidget):
     def validateUsername(self,username):
         err = ""
         if(username==""):
-            err = "Username Should not be blank.\n"
+            err = "Username should not be blank.\n"
         if(len(username)<3):
-            err+="Username Should be of minimum of length 3.\n"
+            err+="Username should be of minimum of length 3.\n"
         if(" " in username):
             err+="Username should not contain spaces.\n"
         x = re.search("[a-zA-Z]",username)
@@ -141,16 +141,16 @@ class Ui_loginSection(QWidget):
             err+=passVal[1]
         if(email=="" or " " in email):
             self.signUpCred2.clear()
-            err+="Invalid Format for Email.\n"
+            err+="Invalid format for Email.\n"
         if(err!=""):
-            QMessageBox.critical(self,"Invalid Input Format Error",err)
+            QMessageBox.critical(self,"Invalid input format error",err)
             return
         if(cnfPassword!=password):
-            QMessageBox.critical(self,"Password Mismatch","Entered Password does not match with above password.")
+            QMessageBox.critical(self,"Password Mismatch","Entered password does not match the above password.")
             self.signUpCred4.clear()
             return
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please try again after reconnecting.")
             return
         if(db.verifyUsername(username)[0]):
             QMessageBox.critical(self,"Error","Username already exists.")
@@ -158,15 +158,15 @@ class Ui_loginSection(QWidget):
             self.loginCred2.clear()
             return
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please try again after reconnecting.")
             return
         res = self.validateEmail(email,name)
         if(res==True):
             if(self.isConnected()==False):
-                QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+                QMessageBox.critical(self,"Connection Error","No Internet Connection. Please try again after reconnecting.")
                 return
             if(db.addQuizAdmin([name,username,password,email])):
-                QMessageBox.information(self,"Success",f"{name}, you are all set to create and manage Quizes. Login as Quiz Admin to get started.")
+                QMessageBox.information(self,"Success",f"{name}, you are all set to create and manage Quizzes. Login as Quiz Admin to get started.")
                 self.switchQuizTakerEntry()
                 return
             else:
@@ -204,22 +204,22 @@ class Ui_loginSection(QWidget):
     def validateEmail(self,email,name):
         email_aval = db.checkEmailAvaibility(email)
         if(email_aval==None):
-            QMessageBox.critical(self,"Connection Error","Something went wrong. Please check internet connection and try later.")
+            QMessageBox.critical(self,"Connection Error","Something went wrong, please check your internet connection and try later.")
             return None
         elif(email_aval==False):
-            QMessageBox.critical(self,"Database Error","Email Already in use. Try Using another email or login with username associated with it.")
+            QMessageBox.critical(self,"Database Error","Email is already in use. Try using another email or login with username associated with it.")
             self.signUpCred2.clear()
             return None
         sent_vercode = rstr.xeger(r'[0-9]{6}')
         print(sent_vercode)
         if(self.sendEmail(email,sent_vercode,name)):
-            recv_vercode, done = QInputDialog.getText(self, 'Email Verification', f'Enter Verification Code sent to your email: {email}')
+            recv_vercode, done = QInputDialog.getText(self, 'Email Verification', f'Enter verification code sent to your email: {email}')
             if(done):
                 if(recv_vercode==sent_vercode):
-                    QMessageBox.information(self,"Verification Success","Email Verified Successfully.")
+                    QMessageBox.information(self,"Verification Success","Email verified successfully.")
                     return True
                 else:
-                    QMessageBox.critical(self,"Verification Failure","Verification code mismatch. Try again.")
+                    QMessageBox.critical(self,"Verification Failure","Incorrect verification code, please try again.")
                     return None
             else:
                 return False
@@ -228,9 +228,9 @@ class Ui_loginSection(QWidget):
     def validatePassword(self,password):
         err = ""
         if(password==""):
-            err = "Password Should not be blank.\n"
+            err = "Password should not be blank.\n"
         if(len(password)<8):
-            err+="Password Should be of minimum length 8.\n"
+            err+="Password should be of minimum length 8.\n"
         if(" " in password):
             err+="Password should not contain spaces.\n"
         x = re.search("^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",password)
@@ -268,7 +268,7 @@ class Ui_loginSection(QWidget):
         return
     def adminLogin(self,username,password):
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
             return False
         res = db.verifyUsername(username)
         if(res[0]):
@@ -303,11 +303,11 @@ class Ui_loginSection(QWidget):
             QMessageBox.critical(self,"Error",err)
             return
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
             return
         res = db.verifySessionCode(quizcode)
         if(res[0]==None):
-            QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
+            QMessageBox.critical(self,"Connection Error","Please check internet connection and try later.")
             return
         elif(res[0]==False):
             QMessageBox.critical(self,"Database Error","Session Code is invalid.")
@@ -329,11 +329,11 @@ class Ui_loginSection(QWidget):
                     QMessageBox.information(self,"Info","You can not attempt the quiz as you cannot complete the quiz by the session end.")
                     return
             if(self.isConnected()==False):
-                QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+                QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
                 return
             res = db.addParticipant(session["session_code"],name,False,-1)
             if(res==None):
-                QMessageBox.critical(self,"Connection Error","Please Check Internet Connection and try later.")
+                QMessageBox.critical(self,"Connection Error","Please check your internet connection and try again later.")
                 return
             
             self.main = MainSpace2(name,session,res)
@@ -720,11 +720,11 @@ class Ui_loginSection(QWidget):
 #endif // QT_CONFIG(tooltip)
         self.signUpCred0.setPlaceholderText(QCoreApplication.translate("loginSection", u"Name", None))
 #if QT_CONFIG(tooltip)
-        self.signUpCred1.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Username should satisfy:</p><p>1. Min Length 3</p><p>2. Contain atleast one alphabet</p><p>3. Contain no spaces</p></body></html>", None))
+        self.signUpCred1.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Username should satisfy:</p><p>1. Min length 3</p><p>2. Contain atleast one alphabet</p><p>3. Contain no spaces</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.signUpCred1.setPlaceholderText(QCoreApplication.translate("loginSection", u"Username", None))
 #if QT_CONFIG(tooltip)
-        self.signUpCred2.setToolTip(QCoreApplication.translate("loginSection", u"Enter Valid Email", None))
+        self.signUpCred2.setToolTip(QCoreApplication.translate("loginSection", u"Enter valid email", None))
 #endif // QT_CONFIG(tooltip)
         self.signUpCred2.setPlaceholderText(QCoreApplication.translate("loginSection", u"Email", None))
 #if QT_CONFIG(tooltip)
@@ -732,7 +732,7 @@ class Ui_loginSection(QWidget):
 #endif // QT_CONFIG(tooltip)
         self.signUpCred3.setPlaceholderText(QCoreApplication.translate("loginSection", u"Password", None))
 #if QT_CONFIG(tooltip)
-        self.signUpCred4.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Should Match Above Password</p></body></html>", None))
+        self.signUpCred4.setToolTip(QCoreApplication.translate("loginSection", u"<html><head/><body><p>Should match above password</p></body></html>", None))
 #endif // QT_CONFIG(tooltip)
         self.signUpCred4.setPlaceholderText(QCoreApplication.translate("loginSection", u"Confirm Password", None))
 #if QT_CONFIG(tooltip)
@@ -749,7 +749,7 @@ class Ui_loginSection(QWidget):
 #endif // QT_CONFIG(tooltip)
         self.takerNameEdit.setPlaceholderText(QCoreApplication.translate("loginSection", u"Your Name", None))
 #if QT_CONFIG(tooltip)
-        self.quizCodeEdit.setToolTip(QCoreApplication.translate("loginSection", u"Enter Valid Quiz Code", None))
+        self.quizCodeEdit.setToolTip(QCoreApplication.translate("loginSection", u"Enter valid Quiz Code", None))
 #endif // QT_CONFIG(tooltip)
         self.quizCodeEdit.setPlaceholderText(QCoreApplication.translate("loginSection", u"Quiz Code (V1F0-B2P4)", None))
 #if QT_CONFIG(tooltip)
@@ -911,13 +911,13 @@ class Ui_MainWindow(QMainWindow):
         questionEdit.setPlaceholderText(u"Question (Max. 500 characters)")
         scoreEdit.setPlaceholderText(u"Score (1 by default)", )
         opt_1.setText(u"Option 1")
-        toolButton_1.setText(u"...")
+        toolButton_1.setText(u"Edit Option")
         opt_2.setText(u"Option 2")
-        toolButton_2.setText(u"...")
+        toolButton_2.setText(u"Edit Option")
         opt_3.setText(u"Option 3")
-        toolButton_3.setText(u"...")
+        toolButton_3.setText(u"Edit Option")
         opt_4.setText(u"Option 4")
-        toolButton_4.setText(u"...")
+        toolButton_4.setText(u"Edit Option")
         pushButton_2.setText(u"Delete")
         icon = QIcon()
         icon.addFile(u"Images/delete.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -1086,7 +1086,7 @@ class Ui_MainWindow(QMainWindow):
             start=datetime.datetime.now()
             end = datetime.datetime(year=2100,day=1,month=1,hour=0,minute=0,second=0)
         if(len(self.questions)==0):
-            err+="You have not added questions or may not have valid inputs. Try Adding or editing added questions.\n"
+            err+="You have not added questions or may not have valid inputs. Try adding or editing added questions.\n"
         if(err!=""):
             QMessageBox.critical(self,"Error",err)
             return
@@ -1104,12 +1104,12 @@ class Ui_MainWindow(QMainWindow):
             if(res==4194304):
                 return
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
             return
         res = db.publishQuiz(self.questions,quizNickName,duration,self.username,start=start,end=end)
         if(res[0]):
             self.reload()
-            QMessageBox.information(self,"Success",f"Quiz is Live Now. You may share the common code provided below:\n {res[1]}")
+            QMessageBox.information(self,"Success",f"Quiz is live now. You may share the common code provided below:\n{res[1]}")
             self.resetAll()
             return
         else:
@@ -1137,7 +1137,7 @@ class Ui_MainWindow(QMainWindow):
         
     def addAllSessionsToList(self):
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
             return
         self.allSessionDetails = db.getAllSessions(self.username)
         self.allSessionDetails = {k: v for k, v in sorted(self.allSessionDetails.items(), key=lambda item: item[1]["session_start"],reverse=True)}
@@ -1188,7 +1188,7 @@ class Ui_MainWindow(QMainWindow):
                 x = "Successfully Attempted"
                 score = str(participant["score"])+" out of "+str(total)
             else:
-                x = "Not Attempted/Unsuccessfull Attempt"
+                x = "Not Attempted/Unsuccessful Attempt"
                 score = "Not Available"
             item2 = QTableWidgetItem(x)
             item2.setTextAlignment(Qt.AlignCenter)
@@ -1200,7 +1200,7 @@ class Ui_MainWindow(QMainWindow):
             row+=1
     def reload(self):
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Please try again after reconnecting.")
             return
         res = db.getAllSessions(self.username)
         if(res!=None):
@@ -1212,14 +1212,14 @@ class Ui_MainWindow(QMainWindow):
             self.sessionCodeRadio.setChecked(True)
             self.sessionDisplayWidget.setVisible(False)
         else:
-            QMessageBox.critical(self,"Connection Error","Unable to fetch database, please check internet connection and try again.")
+            QMessageBox.critical(self,"Connection Error","Unable to fetch database, please check your internet connection and try again.")
             return
     def search(self):
         txt = self.searchBar.text().strip()
         if(self.sessionCodeRadio.isChecked()):
             x = re.search("[A-Z]\d[A-Z]\d-[A-Z]\d[A-Z]\d",txt)
             if(x==None):
-                QMessageBox.critical(self,"Error","Invalid Code Format")
+                QMessageBox.critical(self,"Error","Invalid code format")
                 self.searchBar.clear()
                 return
             self.addSessionsToList(session_code=txt)
@@ -1369,7 +1369,7 @@ class Ui_MainWindow(QMainWindow):
 
         self.horizontalLayout_11.addWidget(self.activeCheck)
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please after reconnecting.")
+            QMessageBox.critical(self,"Connection Error","No Internet Connection. Please try again after reconnecting.")
             self.mwin.close()
         self.sessions = db.getAllSessions(self.username,active=False)
 
@@ -1802,7 +1802,7 @@ class Ui_MainWindow(QMainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Quiz Manager", None))
         # self.usernameLabel.setText(QCoreApplication.translate("MainWindow", u"Welcome, Username", None))
 #if QT_CONFIG(tooltip)
-        self.logOutButton.setToolTip(QCoreApplication.translate("MainWindow", u"Log Out of the Session", None))
+        self.logOutButton.setToolTip(QCoreApplication.translate("MainWindow", u"Log out of the session", None))
 #endif // QT_CONFIG(tooltip)
         self.logOutButton.setText(QCoreApplication.translate("MainWindow", u"LogOut", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Reload", None))
@@ -1812,7 +1812,7 @@ class Ui_MainWindow(QMainWindow):
         self.activeCheck.setText(QCoreApplication.translate("MainWindow", u"Active Quiz", None))
         self.searchBar.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter Quiz Code", None))
 #if QT_CONFIG(tooltip)
-        self.searchButton.setToolTip(QCoreApplication.translate("MainWindow", u"Search Challan", None))
+        self.searchButton.setToolTip(QCoreApplication.translate("MainWindow", u"Search Quiz", None))
 #endif // QT_CONFIG(tooltip)
         self.searchButton.setText(QCoreApplication.translate("MainWindow", u"Search", None))
         self.sessionDetailsBox.setTitle(QCoreApplication.translate("MainWindow", u"Quiz Details", None))
@@ -1872,10 +1872,6 @@ class Ui_QuizPlatform(QMainWindow):
         self.opt_2.setText(question["options"][optionsList[1]]) 
         self.opt_3.setText(question["options"][optionsList[2]]) 
         self.opt_4.setText(question["options"][optionsList[3]])
-        # self.opt_1.setStyleSheet(''' font-size: 28px; ''')
-        # self.opt_2.setStyleSheet(''' font-size: 18px; ''')
-        # self.opt_3.setStyleSheet(''' font-size: 18px; ''')
-        # self.opt_4.setStyleSheet(''' font-size: 18px; ''')
         self.curOptionBasket[0]= optionsList[0]
         self.curOptionBasket[1]= optionsList[1]
         self.curOptionBasket[2]= optionsList[2]
@@ -1923,16 +1919,16 @@ class Ui_QuizPlatform(QMainWindow):
         self.score = self.evaluateQuiz()
         self.completionStatus = True
         if(self.isConnected()==False):
-            QMessageBox.critical(self,"Connection Error","No Internet Connection. Unable to submit responses. Exiting Application")
+            QMessageBox.critical(self,"Connection Error","No internet connection. Unable to submit responses. Exiting the application")
             sys.exit(0)
             return
         res = db.updateParticipant(self.session["session_code"],self.pcode,self.completionStatus,self.score[0])
         if(res):
-            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}. \n You attempted {self.score[2]} questions out of {self.totalQues}.")
+            QMessageBox.information(self,"Info",f"Hey, {self.participantName}, You scored {self.score[0]} out of {self.score[1]}.\nYou attempted {self.score[2]} questions out of {self.totalQues}.")
             self.exit()
             return
         else:
-            QMessageBox.critical(self,"Error","Sorry, didn't able to submit your responses, may be due to internet connectivity issue.")
+            QMessageBox.critical(self,"Error","Sorry, we were not able to submit your responses. This may be caused due to connectivity issues")
             self.exit()
             return
         
@@ -1965,7 +1961,7 @@ class Ui_QuizPlatform(QMainWindow):
             self._status = TimerStatus.init
             self._left_seconds = self.session["duration"] * 60
             if(self.forceFullSubmit==False):
-                QMessageBox.information(self,"Info","Out of Time. Submitting your responses.")
+                QMessageBox.information(self,"Info","Time is up, we are submitting your responses now.")
                 self.submitQuiz()
             
     def _start_event(self):
@@ -2416,7 +2412,7 @@ class Ui_QuizPlatform(QMainWindow):
         self.opt_4.setText(QCoreApplication.translate("MainWindow", u"Option 4", None))
         self.previousButton.setText(QCoreApplication.translate("MainWindow", u"Previous", None))
         self.questionCountLabel.setText(QCoreApplication.translate("MainWindow", u"1/10", None))
-        self.nextButton.setText(QCoreApplication.translate("MainWindow", u"Next", None))
+        self.nextButton.setText(QCoreApplication.translate("MainWindow", u" Save and Next", None))
         # self.submitButton.setText(QCoreApplication.translate("MainWindow", u"Submit", None))
 
 if __name__ == "__main__":
