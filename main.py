@@ -2457,3 +2457,5 @@ if __name__ == "__main__":
     ui.setupUi(win)
     win.show()
     sys.exit(app.exec_())
+
+# L7L1-U0T5
